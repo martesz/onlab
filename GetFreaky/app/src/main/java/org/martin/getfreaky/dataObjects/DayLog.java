@@ -1,19 +1,20 @@
 package org.martin.getfreaky.dataObjects;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+
+import io.realm.RealmList;
+import io.realm.RealmObject;
 
 /**
  * Created by martin on 2016. 04. 20..
  * This class represents the activity of the
  * user on one day
  */
-public class DayLog {
+public class DayLog extends RealmObject {
 
     private Date date;
-    private List<ProgressPicture> progressPictures;
-    private List<Workout> workouts;
+    private RealmList<ProgressPicture> progressPictures;
+    private RealmList<Workout> workouts;
     private BodyLog bodylog;
 
     // Only for GSON
@@ -23,11 +24,11 @@ public class DayLog {
 
     public DayLog(Date date){
         this.date = date;
-        progressPictures = new ArrayList<ProgressPicture>();
-        workouts = new ArrayList<Workout>();
+        progressPictures = new RealmList<ProgressPicture>();
+        workouts = new RealmList<Workout>();
     }
 
-    public DayLog(Date date, List<ProgressPicture> progressPictures, List<Workout> workouts, BodyLog bodylog) {
+    public DayLog(Date date, RealmList<ProgressPicture> progressPictures, RealmList<Workout> workouts, BodyLog bodylog) {
         this.date = date;
         this.progressPictures = progressPictures;
         this.workouts = workouts;
@@ -42,19 +43,19 @@ public class DayLog {
         this.date = date;
     }
 
-    public List<ProgressPicture> getProgressPictures() {
+    public RealmList<ProgressPicture> getProgressPictures() {
         return progressPictures;
     }
 
-    public void setProgressPictures(List<ProgressPicture> progressPictures) {
+    public void setProgressPictures(RealmList<ProgressPicture> progressPictures) {
         this.progressPictures = progressPictures;
     }
 
-    public List<Workout> getWorkouts() {
+    public RealmList<Workout> getWorkouts() {
         return workouts;
     }
 
-    public void setWorkouts(List<Workout> workouts) {
+    public void setWorkouts(RealmList<Workout> workouts) {
         this.workouts = workouts;
     }
 

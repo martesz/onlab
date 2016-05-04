@@ -1,22 +1,22 @@
 package org.martin.getfreaky.dataObjects;
 
-import com.orm.SugarRecord;
+import io.realm.RealmObject;
 
 /**
  * Created by martin on 2016. 04. 20..
  * This class represents one Set of an exercise
  */
-public class Set extends SugarRecord {
+public class WorkingSet extends RealmObject {
 
     private int weight;
     private int repetition;
 
     // GSON needs a no-arg constructor
-    public Set(){
+    public WorkingSet() {
 
     }
 
-    public Set(int repetition, int weight) {
+    public WorkingSet(int repetition, int weight) {
         this.repetition = repetition;
         this.weight = weight;
     }

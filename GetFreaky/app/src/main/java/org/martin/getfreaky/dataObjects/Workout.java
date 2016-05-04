@@ -1,15 +1,16 @@
 package org.martin.getfreaky.dataObjects;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.realm.RealmList;
+import io.realm.RealmObject;
 
 /**
  * Created by martin on 2016. 04. 20..
  */
-public class Workout {
+public class Workout extends RealmObject {
 
     private String name;
-    private List<Exercise> exercises;
+
+    private RealmList<Exercise> exercises;
 
     // GSON needs a no-arg constructor
     public Workout(){
@@ -18,18 +19,18 @@ public class Workout {
 
     public Workout(String name) {
         this.name = name;
-        exercises = new ArrayList<Exercise>();
+        exercises = new RealmList<Exercise>();
     }
 
     public String getName() {
         return name;
     }
 
-    public List<Exercise> getExercises() {
+    public RealmList<Exercise> getExercises() {
         return exercises;
     }
 
-    public void setExercises(List<Exercise> exercises) {
+    public void setExercises(RealmList<Exercise> exercises) {
         this.exercises = exercises;
     }
 

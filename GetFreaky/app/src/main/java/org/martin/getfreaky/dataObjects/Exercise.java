@@ -1,14 +1,14 @@
 package org.martin.getfreaky.dataObjects;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.realm.RealmList;
+import io.realm.RealmObject;
 
 /**
  * Created by martin on 2016. 04. 20..
  * This class represents an exercise
  * that has a name and contains sets
  */
-public class Exercise {
+public class Exercise extends RealmObject {
 
     public String getName() {
         return name;
@@ -19,31 +19,35 @@ public class Exercise {
     }
 
     private String name;
-    private List<Set> sets;
 
-    // GSON needs a no-arg constructor
-    public Exercise(){
+    // One to many relationship
+    // Would be better to use only an interface here,
+    // but Realm only works with this kind of List
+    private RealmList<WorkingSet> sets;
 
+
+    public Exercise() {
+        sets = new RealmList<WorkingSet>();
     }
 
     public Exercise(String name) {
         this.name = name;
-        sets = new ArrayList<Set>();
+        sets = new RealmList<WorkingSet>();
     }
 
-    public void addSet(Set set) {
+    public void addSet(WorkingSet set) {
         sets.add(set);
     }
 
-    public void setSets(List<Set> sets) {
+    public void setSets(RealmList<WorkingSet> sets) {
         this.sets = sets;
     }
 
-    public List<Set> getSets() {
+    public RealmList<WorkingSet> getSets() {
         return sets;
     }
 
-    public void removeSet(Set set) {
+    public void removeSet(WorkingSet set) {
         sets.remove(set);
     }
 

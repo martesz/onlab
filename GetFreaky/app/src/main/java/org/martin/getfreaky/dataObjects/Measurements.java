@@ -1,9 +1,11 @@
 package org.martin.getfreaky.dataObjects;
 
+import io.realm.RealmObject;
+
 /**
  * Created by martin on 2016. 04. 20..
  */
-public class Measurements {
+public class Measurements extends RealmObject {
 
     private int Chest;
     private int Waist;

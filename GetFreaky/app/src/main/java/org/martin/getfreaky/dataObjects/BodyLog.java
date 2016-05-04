@@ -1,15 +1,17 @@
 package org.martin.getfreaky.dataObjects;
 
+import io.realm.RealmObject;
+
 /**
  * Created by martin on 2016. 04. 20..
  */
-public class BodyLog {
+public class BodyLog extends RealmObject{
 
     private float weight;
     private int bodyFatPercentage;
     private Measurements measurements;
 
-    // GSON need a no-arg constructor
+    // GSON needs a no-arg constructor
     public BodyLog() {
 
     }
