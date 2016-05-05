@@ -1,8 +1,15 @@
 package org.martin.getfreaky.dataObjects;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+
 /**
  * Created by martin on 2016. 04. 20..
  */
+@Entity
 public class Measurements {
 
     private int Chest;
@@ -15,6 +22,10 @@ public class Measurements {
     private int Thighs;
     private int Calves;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long measurementsId;
+    
     // GSON needs a no argument constructor
     public Measurements() {
     }
@@ -107,4 +118,13 @@ public class Measurements {
     public void setCalves(int calves) {
         Calves = calves;
     }
+
+    public Long getMeasurementsId() {
+        return measurementsId;
+    }
+
+    public void setMeasurementsId(Long measurementsId) {
+        this.measurementsId = measurementsId;
+    }
+    
 }

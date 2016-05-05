@@ -1,13 +1,33 @@
 package org.martin.getfreaky.dataObjects;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+
 /**
  * Created by martin on 2016. 04. 20..
  */
+@Entity
 public class BodyLog {
-
+    
     private float weight;
     private int bodyFatPercentage;
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "MEASUREMENTSID")
     private Measurements measurements;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long bodyLogId;
+    
+    @OneToOne
+    @JoinColumn(name = "DAYLOGID")
+    private DayLog dayLog;
 
     // GSON need a no-arg constructor
     public BodyLog() {
@@ -46,5 +66,21 @@ public class BodyLog {
 
     public void setMeasurements(Measurements measurements) {
         this.measurements = measurements;
+    }
+
+    public Long getBodyLogId() {
+        return bodyLogId;
+    }
+
+    public void setBodyLogId(Long bodyLogId) {
+        this.bodyLogId = bodyLogId;
+    }
+
+    public DayLog getDayLog() {
+        return dayLog;
+    }
+
+    public void setDayLog(DayLog dayLog) {
+        this.dayLog = dayLog;
     }
 }
