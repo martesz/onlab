@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title=
+        "Settings" >
+        <EditTextPreference
+            android:defaultValue="empty"
+            android:key="name"
+            android:title="Username" />
+        <EditTextPreference
+            android:defaultValue="empty"
+            android:key="@string/BASE_URL_KEY"
+            android:title="Server base URL" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="autologin"
+            android:title="Automatikus belépés" />
+        <SwitchPreference
+            android:title="Adatok megjegyzése"
+            android:key="remember"
+            android:summaryOff="Kikapcsolva"
+            android:summaryOn="Bekapcsolva"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>
