@@ -1,4 +1,4 @@
-package org.martin.getfreaky;
+package org.martin.getfreaky.log;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.martin.getfreaky.R;
 
 /**
  * Created by martin on 2016. 05. 07..

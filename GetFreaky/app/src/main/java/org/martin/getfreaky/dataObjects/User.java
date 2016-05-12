@@ -13,6 +13,12 @@ public class User extends RealmObject {
     // TODO later should store password encrypted
     private String password;
     private RealmList<DayLog> dayLogs;
+    private RealmList<Workout> workouts;
+
+    public User(){
+        dayLogs = new RealmList<DayLog>();
+        workouts = new RealmList<Workout>();
+    }
 
     public String getName() {
         return name;
@@ -44,5 +50,13 @@ public class User extends RealmObject {
 
     public void setDayLogs(RealmList<DayLog> dayLogs) {
         this.dayLogs = dayLogs;
+    }
+
+    public RealmList<Workout> getWorkouts() {
+        return workouts;
+    }
+
+    public void setWorkouts(RealmList<Workout> workouts) {
+        this.workouts = workouts;
     }
 }

@@ -1,7 +1,10 @@
 package org.martin.getfreaky.dataObjects;
 
+import java.util.UUID;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by martin on 2016. 04. 20..
@@ -9,6 +12,9 @@ import io.realm.RealmObject;
  * that has a name and contains sets
  */
 public class Exercise extends RealmObject {
+
+    @PrimaryKey
+    private String exerciseId;
 
     public String getName() {
         return name;
@@ -27,10 +33,12 @@ public class Exercise extends RealmObject {
 
 
     public Exercise() {
+        exerciseId = UUID.randomUUID().toString();
         sets = new RealmList<WorkingSet>();
     }
 
     public Exercise(String name) {
+        exerciseId = UUID.randomUUID().toString();
         this.name = name;
         sets = new RealmList<WorkingSet>();
     }
@@ -53,5 +61,13 @@ public class Exercise extends RealmObject {
 
     public int countSets() {
         return sets.size();
+    }
+
+    public String getExerciseId() {
+        return exerciseId;
+    }
+
+    public void setExerciseId(String exerciseId) {
+        this.exerciseId = exerciseId;
     }
 }

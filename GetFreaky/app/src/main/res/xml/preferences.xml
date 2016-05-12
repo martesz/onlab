@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title=
-        "Settings" >
+        "Server" >
         <EditTextPreference
             android:defaultValue="empty"
             android:key="name"
@@ -19,6 +19,13 @@
             android:key="remember"
             android:summaryOff="Kikapcsolva"
             android:summaryOn="Bekapcsolva"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Exercise default values">
+        <EditTextPreference
+            android:defaultValue="60"
+            android:key="defaultRestTime"
+            android:title="@string/rest_time_default"
+            android:inputType="number"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

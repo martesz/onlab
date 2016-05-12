@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GetFreaky</string>
+    <string name="app_name">Get Freaky</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
@@ -63,7 +63,7 @@
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
+    <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
@@ -75,4 +75,36 @@
     </string>
     <string name="BASE_URL_KEY">base</string>
     <string name="menu_settings">Settings</string>
+    <string name="workout_title">Add Workouts</string>
+    <string name="create_workout">Create Workout</string>
+    <string name="do_workout">Do workout</string>
+    <string name="empty_exercise_list">Add exercises</string>
+    <string name="rest_time_default">Rest time</string>
+    <string name="btnOk">Ok</string>
+    <string name="btnCancel">Cancel</string>
+    <string name="lblExerciseName">Name:</string>
+    <string name="lblNumberOfSets">Number of sets:</string>
+    <string name="workingSet_no">Sets:</string>
+    <string name="weight">Weight (kg)</string>
+    <string name="reps">Reps</string>
+    <string name="saveSet">Save set</string>
+    <string name="exit">Exit</string>
+    <string name="set">Set</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="noWorkoutResults">No results for this day</string>
+    <string name="workoutResultHelp">(kg) x (reps)</string>
+    <string name="weight_kg">Weight (kg)</string>
+    <string name="bodyfat">Bodyfat (%)</string>
+    <string name="chest">Chest</string>
+    <string name="waist">Waist</string>
+    <string name="arms">Arms</string>
+    <string name="shoulders">Shoulders</string>
+    <string name="forearms">Forearms</string>
+    <string name="neck">Neck</string>
+    <string name="hips">Hips</string>
+    <string name="thighs">Thighs</string>
+    <string name="calves">Calves</string>
+    <string name="save">Save</string>
 </resources>

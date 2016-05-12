@@ -13,7 +13,7 @@ public class BodyLog extends RealmObject{
 
     // GSON needs a no-arg constructor
     public BodyLog() {
-
+        measurements = new Measurements();
     }
 
     public BodyLog(float weight, int bodyFat, Measurements measurements) {

@@ -30,13 +30,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.User;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -44,6 +48,8 @@ import static android.Manifest.permission.READ_CONTACTS;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+
+    public static final String CURRENT_DAYLOG_ID_KEY = "DAYLOGIDKEY";
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -59,7 +65,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     };
 
     public static String USER_EMAIL_KEY = "user";
-    public static String PASSWORD_KEY = "password";
+    public static String USER_PASSWORD_KEY = "password";
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -317,6 +323,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mPassword = password;
         }
 
+        Realm realm;
+
         @Override
         protected Boolean doInBackground(Void... params) {
 
@@ -326,26 +334,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } catch (InterruptedException e) {
                 return false;
             }
-            Realm realm = Realm.getDefaultInstance();
+            realm = Realm.getDefaultInstance();
             User user = realm.where(User.class)
                     .equalTo("email", mEmail)
                     .findFirst();
 
             // If the user does not exist create it
             if (user == null) {
-                realm.beginTransaction();
-                User newUser = realm.createObject(User.class);
+                User newUser = new User();
                 newUser.setEmail(mEmail);
                 newUser.setPassword(mPassword);
+                createDaylog(newUser);
+                realm.beginTransaction();
+                realm.copyToRealm(newUser);
                 realm.commitTransaction();
-                realm.close();
                 saveUserInPreferences(mEmail, mPassword);
+                realm.close();
                 return true;
             } else {
                 // Check the password
                 if (user.getPassword().equals(mPassword)) {
-                    realm.close();
+                    createDaylog(user);
                     saveUserInPreferences(mEmail, mPassword);
+                    realm.close();
                     return true;
                 } else {
                     realm.close();
@@ -355,10 +366,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         }
 
-        private void saveUserInPreferences(String email, String password){
+        private void createDaylog(User user){
+
+            // Get or create a daylog for today
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+            String currentDay = fmt.format(calendar.getTime());
+
+            DayLog dayLog = null;
+
+            RealmList<DayLog> dayLogs = user.getDayLogs();
+            for (DayLog dl : dayLogs) {
+                if (fmt.format(dl.getDate()).equals(currentDay)) {
+                    dayLog = dl;
+                }
+            }
+            if (dayLog == null) {
+                dayLog = new DayLog(calendar.getTime());
+                realm.beginTransaction();
+                user.getDayLogs().add(dayLog);
+                realm.commitTransaction();
+            }
+
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
-            preferences.edit().putString(USER_EMAIL_KEY, email);
-            preferences.edit().putString(PASSWORD_KEY, password);
+            preferences.edit().putString(CURRENT_DAYLOG_ID_KEY, dayLog.getDayLogId()).apply();
+        }
+
+        private void saveUserInPreferences(String email, String password) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+            preferences.edit().putString(USER_EMAIL_KEY, email).apply();
+            preferences.edit().putString(USER_PASSWORD_KEY, password).apply();
         }
 
 

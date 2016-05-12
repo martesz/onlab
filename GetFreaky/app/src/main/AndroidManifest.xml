@@ -15,20 +15,31 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".workout.CreateWorkoutActivity"
+            android:label="@string/create_workout"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".workout.DoWorkoutActivity"
+            android:label="@string/do_workout"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login">
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".log.EditLogsActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>
