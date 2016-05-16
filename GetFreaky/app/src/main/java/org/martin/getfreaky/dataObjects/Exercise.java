@@ -16,21 +16,12 @@ public class Exercise extends RealmObject {
     @PrimaryKey
     private String exerciseId;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     private String name;
 
     // One to many relationship
     // Would be better to use only an interface here,
     // but Realm only works with this kind of List
     private RealmList<WorkingSet> sets;
-
 
     public Exercise() {
         exerciseId = UUID.randomUUID().toString();
@@ -41,6 +32,24 @@ public class Exercise extends RealmObject {
         exerciseId = UUID.randomUUID().toString();
         this.name = name;
         sets = new RealmList<WorkingSet>();
+    }
+
+
+    public Exercise(Exercise exercise) {
+        this.name = exercise.getName();
+        this.exerciseId = exercise.getExerciseId();
+        this.sets = new RealmList<>();
+        for(WorkingSet ws : exercise.getSets()){
+            this.sets.add(new WorkingSet(ws));
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void addSet(WorkingSet set) {

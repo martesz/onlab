@@ -13,16 +13,23 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import network.DayLogResponse;
+import network.LoginResponse;
+import network.WorkoutResponse;
 import org.martin.getfreaky.dataObjects.BodyLog;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.Measurements;
+import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.database.QueryBean;
@@ -48,10 +55,40 @@ public class GetFreaky {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getJson() {
-        WorkingSet ws = queryBean.getWorkingSet(409);
+    public Response getJson() {
+        Exercise ex = new Exercise("Cable row");
+        WorkingSet ws = new WorkingSet(11, 12);
+        ex.addSet(ws);
+        ws = new WorkingSet(13, 14);
+        ex.addSet(ws);
+        queryBean.saveExercise(ex);
+        List<Exercise> exercises = queryBean.getAllExercises();
+
         Gson gson = new Gson();
-        String json = gson.toJson(ws);
+        String json = gson.toJson(exercises.get(exercises.size() - 1));
+        return Response.ok(json).build();
+    }
+
+    @GET
+    @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getById(@PathParam("id") String id) {
+        Exercise ex = queryBean.getExercise(id);
+
+        Gson gson = new Gson();
+        String json = gson.toJson(ex);
+        return json;
+    }
+
+    @GET
+    @Path("exampleWorkout")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getExampleUser() {
+        Workout workout = new Workout("chest");
+        workout.addExercise(new Exercise("bench press"));
+
+        Gson gson = new Gson();
+        String json = gson.toJson(workout);
         return json;
     }
 
@@ -79,18 +116,6 @@ public class GetFreaky {
         return json;
     }
 
-    /**
-     * PUT method for updating or creating an instance of HelloWorld
-     *
-     * @param content representation for the resource
-     * @return an HTTP response with content of the updated or created resource.
-     */
-    @PUT
-    @Consumes("text/html")
-    public void putHtml(String content) {
-
-    }
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -99,4 +124,77 @@ public class GetFreaky {
         exercise = gson.fromJson(content, Exercise.class);
         return gson.toJson(exercise);
     }
+
+    @PUT
+    @Path("signInOrRegister")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String signInOrRegisterUser(String content) {
+        Gson gson = new Gson();
+        User user = gson.fromJson(content, User.class);
+        LoginResponse response;
+        if (user.getEmail() != null) {
+            System.out.println(user.getEmail());
+            response = queryBean.signInOrRegisterUser(user);
+        } else {
+            response = new LoginResponse(LoginResponse.ResponseMessage.EMAIL_NULL);
+        }
+        return gson.toJson(response);
+    }
+
+    /**
+     *
+     * @param email The user's email
+     * @return The user's workouts
+     */
+    @GET
+    @Path("{email}/workouts")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getWorkouts(@PathParam("email") String email) {
+        List<Workout> workouts = queryBean.getWorkouts(email);
+        Gson gson = new Gson();
+        return gson.toJson(workouts);
+    }
+
+    @PUT
+    @Path("{email}/workouts")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String uploadOrUpdateWorkout(String content, @PathParam("email") String email) {
+        Gson gson = new Gson();
+        Workout workout = gson.fromJson(content, Workout.class);
+        WorkoutResponse response = queryBean.insertOrUpdateWorkout(workout, email);
+        return gson.toJson(response);
+    }
+
+    @DELETE
+    @Path("{email}/workouts/{workoutId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String deleteWorkout(@PathParam("email") String email, @PathParam("workoutId") String workoutId) {
+        Gson gson = new Gson();
+        WorkoutResponse response = queryBean.deleteWorkout(workoutId, email);
+        return gson.toJson(response);
+    }
+
+    @GET
+    @Path("{email}/dayLogs")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getDayLogs(@PathParam("email") String email) {
+        List<DayLog> dayLogs = queryBean.getDayLogs(email);
+        Gson gson = new Gson();
+        return gson.toJson(dayLogs);
+    }
+
+    @PUT
+    @Path("{email}/dayLogs")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String uploadOrUpdateDaylog(String content, @PathParam("email") String email) {
+        Gson gson = new Gson();
+        DayLog dayLog = gson.fromJson(content, DayLog.class);
+        DayLogResponse response = queryBean.insertOrUpdateDayLog(dayLog, email);
+        return gson.toJson(response);
+    }
+
 }

@@ -26,15 +26,27 @@ public class Measurements extends RealmObject {
             int foreArms, int neck, int hips, int thighs,
             int calves) {
 
-        Chest = chest;
-        Waist = waist;
-        Arms = arms;
-        Shoulders = shoulders;
+        this.Chest = chest;
+        this.Waist = waist;
+        this.Arms = arms;
+        this.Shoulders = shoulders;
         this.foreArms = foreArms;
-        Neck = neck;
-        Hips = hips;
-        Thighs = thighs;
-        Calves = calves;
+        this.Neck = neck;
+        this.Hips = hips;
+        this.Thighs = thighs;
+        this.Calves = calves;
+    }
+
+    public Measurements(Measurements measurements) {
+        Chest = measurements.getChest();
+        Waist = measurements.getWaist();
+        Arms = measurements.getArms();
+        Shoulders = measurements.getShoulders();
+        foreArms = measurements.getForeArms();
+        Neck = measurements.getNeck();
+        Hips = measurements.getHips();
+        Thighs = measurements.getThighs();
+        Calves = measurements.getCalves();
     }
 
 

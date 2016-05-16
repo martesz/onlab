@@ -21,6 +21,11 @@ public class WorkingSet extends RealmObject {
         this.weight = weight;
     }
 
+    public WorkingSet(WorkingSet ws) {
+        this.weight = ws.getWeight();
+        this.repetition = ws.getRepetition();
+    }
+
     public int getWeight() {
         return weight;
     }

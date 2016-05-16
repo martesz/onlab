@@ -37,6 +37,10 @@ public class WorkoutAdapter extends BaseAdapter {
         workouts.remove(index);
     }
 
+    public boolean contains(Workout workout) {
+        return workouts.contains(workout);
+    }
+
     @Override
     public int getCount() {
         return workouts.size();

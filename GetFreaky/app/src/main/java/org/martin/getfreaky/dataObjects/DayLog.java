@@ -46,6 +46,20 @@ public class DayLog extends RealmObject {
         this.bodylog = bodylog;
     }
 
+    public DayLog(DayLog dayLog){
+        this.dayLogId = dayLog.getDayLogId();
+        this.date = dayLog.getDate();
+        this.workoutResults = new RealmList<>();
+        for(Workout workout : dayLog.getWorkoutResults()){
+            this.workoutResults.add(new Workout(workout));
+        }
+        this.progressPictures = new RealmList<>();
+        for(ProgressPicture pp : dayLog.getProgressPictures()){
+            this.progressPictures.add(new ProgressPicture(pp));
+        }
+        this.bodylog = new BodyLog(dayLog.getBodylog());
+    }
+
     public Date getDate() {
         return date;
     }
@@ -84,5 +98,21 @@ public class DayLog extends RealmObject {
 
     public void setDayLogId(String dayLogId) {
         this.dayLogId = dayLogId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DayLog)) return false;
+
+        DayLog dayLog = (DayLog) o;
+
+        return dayLogId.equals(dayLog.dayLogId);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return dayLogId.hashCode();
     }
 }

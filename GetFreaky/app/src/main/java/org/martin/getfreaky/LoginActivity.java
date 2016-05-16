@@ -29,10 +29,16 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.User;
+import org.martin.getfreaky.network.DayLogResponse;
+import org.martin.getfreaky.network.GetFreakyService;
+import org.martin.getfreaky.network.LoginResponse;
+import org.martin.getfreaky.network.RetrofitClient;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,6 +47,7 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
+import retrofit2.Call;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -71,6 +78,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
+    private LoginResponse response;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -328,12 +336,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
 
-            try {
-                // Simulate network access.
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                return false;
-            }
             realm = Realm.getDefaultInstance();
             User user = realm.where(User.class)
                     .equalTo("email", mEmail)
@@ -344,29 +346,69 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 User newUser = new User();
                 newUser.setEmail(mEmail);
                 newUser.setPassword(mPassword);
-                createDaylog(newUser);
-                realm.beginTransaction();
-                realm.copyToRealm(newUser);
-                realm.commitTransaction();
-                saveUserInPreferences(mEmail, mPassword);
-                realm.close();
-                return true;
+
+                RetrofitClient client = new RetrofitClient();
+                GetFreakyService service = client.createService();
+                Call<LoginResponse> call = service.signInOrRegisterUser(newUser);
+                try {
+                    response = call.execute().body();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (response != null) {
+                    if (response.getMessage() == LoginResponse.ResponseMessage.USER_REGISTERED ||
+                            response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
+                        createDaylog(newUser);
+                        realm.beginTransaction();
+                        realm.copyToRealm(newUser);
+                        realm.commitTransaction();
+                        saveUserInPreferences(mEmail, mPassword);
+                        realm.close();
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    response = new LoginResponse(LoginResponse.ResponseMessage.COULD_NOT_CONNECT);
+                    return false;
+                }
             } else {
+                // If the user exists in the DB, do not need to check it on the server
                 // Check the password
                 if (user.getPassword().equals(mPassword)) {
                     createDaylog(user);
                     saveUserInPreferences(mEmail, mPassword);
                     realm.close();
+                    response = new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
                     return true;
                 } else {
                     realm.close();
+                    response = new LoginResponse(LoginResponse.ResponseMessage.WRONG_PASSWORD);
                     return false;
                 }
             }
 
         }
 
-        private void createDaylog(User user){
+        private void createDaylog(User user) {
+            RealmList<DayLog> dayLogs = user.getDayLogs();
+
+            RetrofitClient client = new RetrofitClient();
+            GetFreakyService service = client.createService();
+            Call<List<DayLog>> call = service.getDayLogs(user.getEmail());
+
+            try {
+                List<DayLog> dayLogsOnServer = call.execute().body();
+                for(DayLog dayLog : dayLogsOnServer){
+                    if(!dayLogs.contains(dayLog)){
+                        realm.beginTransaction();
+                        dayLogs.add(dayLog);
+                        realm.commitTransaction();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             // Get or create a daylog for today
             Calendar calendar = Calendar.getInstance();
@@ -375,7 +417,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             DayLog dayLog = null;
 
-            RealmList<DayLog> dayLogs = user.getDayLogs();
             for (DayLog dl : dayLogs) {
                 if (fmt.format(dl.getDate()).equals(currentDay)) {
                     dayLog = dl;
@@ -386,6 +427,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 realm.beginTransaction();
                 user.getDayLogs().add(dayLog);
                 realm.commitTransaction();
+                Call<DayLogResponse> dayLogCall = service.putDayLog(dayLog, user.getEmail());
+                try {
+                    DayLogResponse dlr = dayLogCall.execute().body();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
@@ -409,9 +456,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                 LoginActivity.this.startActivity(myIntent);
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                if (response != null) {
+                    if (response.getMessage() == LoginResponse.ResponseMessage.WRONG_PASSWORD) {
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                    } else {
+                        Toast.makeText(LoginActivity.this, response.getMessage().toString(), Toast.LENGTH_LONG).show();
+                    }
+                }
             }
+
         }
 
         @Override

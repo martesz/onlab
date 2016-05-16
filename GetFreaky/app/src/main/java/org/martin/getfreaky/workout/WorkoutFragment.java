@@ -22,6 +22,9 @@ import org.martin.getfreaky.LoginActivity;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.Workout;
+import org.martin.getfreaky.network.GetFreakyService;
+import org.martin.getfreaky.network.RetrofitClient;
+import org.martin.getfreaky.network.WorkoutResponse;
 import org.martin.getfreaky.preferences.URLManager;
 
 import java.util.ArrayList;
@@ -30,6 +33,9 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -53,6 +59,7 @@ public class WorkoutFragment extends Fragment {
     private FloatingActionButton fab;
     private Realm realm;
     private User user;
+    private String userEmail;
 
     @Nullable
     @Override
@@ -79,7 +86,7 @@ public class WorkoutFragment extends Fragment {
         Realm.setDefaultConfiguration(config);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String userEmail = preferences.getString(LoginActivity.USER_EMAIL_KEY, "DefaultUser");
+        userEmail = preferences.getString(LoginActivity.USER_EMAIL_KEY, "DefaultUser");
 
         realm = Realm.getDefaultInstance();
         realm.beginTransaction();
@@ -103,6 +110,34 @@ public class WorkoutFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 showNewWorkoutDialog();
+            }
+        });
+
+        RetrofitClient client = new RetrofitClient();
+        GetFreakyService service = client.createService();
+        Call<List<Workout>> call = service.getWorkouts(user.getEmail());
+        call.enqueue(new Callback<List<Workout>>() {
+            @Override
+            public void onResponse(Call<List<Workout>> call, Response<List<Workout>> response) {
+                List<Workout> workouts = new ArrayList<Workout>();
+                user = realm.where(User.class)
+                        .equalTo("email", userEmail)
+                        .findFirst();
+                RealmList<Workout> workoutRealmResults = user.getWorkouts();
+                for (Workout workout : response.body()) {
+                    if (!adapter.contains(workout)) {
+                        adapter.addWorkout(workout);
+                        realm.beginTransaction();
+                        workoutRealmResults.add(workout);
+                        realm.commitTransaction();
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<List<Workout>> call, Throwable t) {
+                Toast.makeText(getContext(), "Could not connect to server", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -175,7 +210,7 @@ public class WorkoutFragment extends Fragment {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
             Workout workout = (Workout) adapter.getItem(info.position);
 
-            // Delete workout from DB
+            // Delete workout from DB and server
             deleteWorkout(workout);
 
             adapter.removeItem(info.position);
@@ -224,6 +259,29 @@ public class WorkoutFragment extends Fragment {
     }
 
     private void deleteWorkout(Workout workout) {
+
+        // Copy the workout, because Realm uses lazy loading
+        // and It causes errors in asynchronous calls
+        Workout copy = new Workout(workout);
+        RetrofitClient client = new RetrofitClient();
+        GetFreakyService service = client.createService();
+        Call<WorkoutResponse> call = service.deleteWorkout(userEmail, copy.getId());
+        call.enqueue(new Callback<WorkoutResponse>() {
+            @Override
+            public void onResponse(Call<WorkoutResponse> call, Response<WorkoutResponse> response) {
+                if (response.body() != null) {
+                    Toast.makeText(getContext(), response.body().getMessage().toString(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getContext(), "Could not delete workout on server", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WorkoutResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Could not delete workout on server", Toast.LENGTH_LONG).show();
+            }
+        });
+
         Realm realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         Workout workoutInDB = realm.where(Workout.class)
@@ -232,6 +290,8 @@ public class WorkoutFragment extends Fragment {
         workoutInDB.deleteFromRealm();
         realm.commitTransaction();
         realm.close();
+
+
     }
 
     private Workout getWorkoutFromRealm(String id) {

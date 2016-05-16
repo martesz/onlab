@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 /**
@@ -14,13 +13,7 @@ import javax.persistence.ManyToOne;
 @Entity
 public class WorkingSet {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long workingSetId;
-
-    @JoinColumn(name = "EXERCISEID")
-    @ManyToOne
-    private Exercise exercise;
+    private Long Id;
 
     private int weight;
     private int repetition;
@@ -35,14 +28,6 @@ public class WorkingSet {
         this.weight = weight;
     }
 
-    public Exercise getExercise() {
-        return exercise;
-    }
-
-    public void setExercise(Exercise exercise) {
-        this.exercise = exercise;
-    }
-
     public int getWeight() {
         return weight;
     }
@@ -51,11 +36,13 @@ public class WorkingSet {
         return repetition;
     }
 
-    public Long getWorkingSetId() {
-        return workingSetId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public Long getId() {
+        return Id;
     }
 
-    public void setWorkingSetId(Long workingSetId) {
-        this.workingSetId = workingSetId;
+    public void setId(Long Id) {
+        this.Id = Id;
     }
 }

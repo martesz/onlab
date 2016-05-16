@@ -3,6 +3,7 @@ package org.martin.getfreaky.dataObjects;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
 
 /**
  * Created by martin on 2016. 04. 20.. This class represents the activity of the
@@ -19,41 +21,43 @@ import javax.persistence.OneToOne;
  */
 @Entity
 @NamedQuery(
-    name="findAllDayLogs",
-    query="SELECT dl FROM DayLog dl "
+        name = "findAllDayLogs",
+        query = "SELECT dl FROM DayLog dl "
 )
 public class DayLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long dayLogId;
+    private String dayLogId;
 
+    @Temporal(javax.persistence.TemporalType.DATE)
     private Date date;
 
-    @OneToMany(mappedBy = "dayLog", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private List<ProgressPicture> progressPictures;
 
-    @OneToMany(mappedBy = "dayLog", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Workout> workouts;
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<Workout> workoutResults;
 
-    @OneToOne(mappedBy = "dayLog", cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private BodyLog bodylog;
 
     // Only for GSON
     public DayLog() {
-
+        dayLogId = UUID.randomUUID().toString();
     }
 
     public DayLog(Date date) {
+        dayLogId = UUID.randomUUID().toString();
         this.date = date;
         progressPictures = new ArrayList<>();
-        workouts = new ArrayList<>();
+        workoutResults = new ArrayList<>();
     }
 
     public DayLog(Date date, List<ProgressPicture> progressPictures, List<Workout> workouts, BodyLog bodylog) {
+        dayLogId = UUID.randomUUID().toString();
         this.date = date;
         this.progressPictures = progressPictures;
-        this.workouts = workouts;
+        this.workoutResults = workouts;
         this.bodylog = bodylog;
     }
 
@@ -73,12 +77,12 @@ public class DayLog {
         this.progressPictures = progressPictures;
     }
 
-    public List<Workout> getWorkouts() {
-        return workouts;
+    public List<Workout> getWorkoutResults() {
+        return workoutResults;
     }
 
-    public void setWorkouts(List<Workout> workouts) {
-        this.workouts = workouts;
+    public void setWorkoutResults(List<Workout> workoutResults) {
+        this.workoutResults = workoutResults;
     }
 
     public BodyLog getBodylog() {
@@ -89,16 +93,24 @@ public class DayLog {
         this.bodylog = bodylog;
     }
 
-    public Long getDayLogId() {
+    public String getDayLogId() {
         return dayLogId;
     }
 
-    public void setDayLogId(Long dayLogId) {
+    public void setDayLogId(String dayLogId) {
         this.dayLogId = dayLogId;
     }
-    
-    public void addWorkout(Workout w){
-        workouts.add(w);
+
+    public void addWorkout(Workout w) {
+        workoutResults.add(w);
+    }
+
+    public void updateBodyLog(BodyLog bodylog) {
+        if (this.bodylog != null) {
+            this.bodylog.setValues(bodylog);
+        } else {
+            this.bodylog = bodylog;
+        }
     }
 
 }

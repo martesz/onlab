@@ -1,41 +1,34 @@
 package org.martin.getfreaky.dataObjects;
 
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 /**
- * Created by martin on 2016. 04. 20..
- * This class represents a picture
+ * Created by martin on 2016. 04. 20.. This class represents a picture
  */
 @Entity
 public class ProgressPicture {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long progressPictureId;
-    
-    @ManyToOne
-    @JoinColumn(name = "DAYLOGID")
-    private DayLog dayLog;
-    
-    // TODO this class should handle pictures
+    private Long id;
 
+    // TODO this class should handle pictures
     private Byte[] image;
 
-    public ProgressPicture(){
+    public ProgressPicture() {
 
     }
 
-    public Long getProgressPictureId() {
-        return progressPictureId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public Long getId() {
+        return id;
     }
 
-    public void setProgressPictureId(Long progressPictureId) {
-        this.progressPictureId = progressPictureId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Byte[] getImage() {
@@ -46,11 +39,28 @@ public class ProgressPicture {
         this.image = image;
     }
 
-    public DayLog getDayLog() {
-        return dayLog;
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 29 * hash + Objects.hashCode(this.id);
+        return hash;
     }
 
-    public void setDayLog(DayLog dayLog) {
-        this.dayLog = dayLog;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ProgressPicture other = (ProgressPicture) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return true;
     }
 }

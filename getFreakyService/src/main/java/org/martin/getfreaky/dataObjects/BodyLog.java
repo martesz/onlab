@@ -17,17 +17,9 @@ public class BodyLog {
     private float weight;
     private int bodyFatPercentage;
     
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "MEASUREMENTSID")
-    private Measurements measurements;
+    private Measurements measurements;    
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long bodyLogId;
-    
-    @OneToOne
-    @JoinColumn(name = "DAYLOGID")
-    private DayLog dayLog;
+    private Long id;
 
     // GSON need a no-arg constructor
     public BodyLog() {
@@ -60,6 +52,7 @@ public class BodyLog {
         }
     }
 
+    @OneToOne(cascade = CascadeType.ALL)
     public Measurements getMeasurements() {
         return measurements;
     }
@@ -68,19 +61,19 @@ public class BodyLog {
         this.measurements = measurements;
     }
 
-    public Long getBodyLogId() {
-        return bodyLogId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public Long getId() {
+        return id;
     }
 
-    public void setBodyLogId(Long bodyLogId) {
-        this.bodyLogId = bodyLogId;
+    public void setId(Long id) {
+        this.id = id;
     }
-
-    public DayLog getDayLog() {
-        return dayLog;
-    }
-
-    public void setDayLog(DayLog dayLog) {
-        this.dayLog = dayLog;
+    
+    public void setValues(BodyLog bodylog){
+        this.weight = bodylog.getWeight();
+        this.bodyFatPercentage = bodylog.bodyFatPercentage;
+        this.measurements.setValues(bodylog.getMeasurements());
     }
 }

@@ -2,13 +2,12 @@ package org.martin.getfreaky.dataObjects;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 /**
@@ -17,29 +16,29 @@ import javax.persistence.OneToMany;
 @Entity
 public class Workout {
 
-    private Long workoutId;
-    
+    private String id;
+
     private String name;
-    
+
     private List<Exercise> exercises;
-    
-    private DayLog dayLog;
 
     // GSON needs a no-arg constructor
-    public Workout(){
-
+    public Workout() {
+        id = UUID.randomUUID().toString();
     }
 
     public Workout(String name) {
+        id = UUID.randomUUID().toString();
         this.name = name;
         exercises = new ArrayList<Exercise>();
     }
 
+    @Column(name = "WORKOUT_NAME")
     public String getName() {
         return name;
     }
 
-    @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     public List<Exercise> getExercises() {
         return exercises;
     }
@@ -57,26 +56,44 @@ public class Workout {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public Long getWorkoutId() {
-        return workoutId;
+    public String getId() {
+        return id;
     }
 
-    public void setWorkoutId(Long workoutId) {
-        this.workoutId = workoutId;
-    }
-
-    @JoinColumn(name = "DAYLOGID")
-    @ManyToOne
-    public DayLog getDayLog() {
-        return dayLog;
-    }
-
-    public void setDayLog(DayLog dayLog) {
-        this.dayLog = dayLog;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public int countExercises() {
         return exercises.size();
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 83 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Workout other = (Workout) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return true;
     }
 }

@@ -12,18 +12,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.martin.getfreaky.LoginActivity;
-import org.martin.getfreaky.MainActivity;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
-import org.martin.getfreaky.utils.Sequence;
+import org.martin.getfreaky.network.DayLogResponse;
+import org.martin.getfreaky.network.GetFreakyService;
+import org.martin.getfreaky.network.RetrofitClient;
 
 import java.util.Iterator;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by martin on 2016. 05. 08..
@@ -117,6 +121,7 @@ public class DoWorkoutActivity extends AppCompatActivity {
                         dayLog.getWorkoutResults().add(workoutResult);
                         realm.commitTransaction();
                         Toast.makeText(v.getContext(), "Workout results saved", Toast.LENGTH_LONG).show();
+                        putDayLog(dayLog);
                         finish();
                     }
                 } else {
@@ -164,19 +169,28 @@ public class DoWorkoutActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int sequenceStart = preferences.getInt(MainActivity.SEQUENCE_KEY, Integer.MAX_VALUE / 2);
-        Sequence.setStart(sequenceStart);
-    }
+    private void putDayLog(DayLog dayLog) {
+        DayLog copy = new DayLog(dayLog);
+        RetrofitClient client = new RetrofitClient();
+        GetFreakyService service = client.createService();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(DoWorkoutActivity.this);
+        String userEmail = preferences.getString(LoginActivity.USER_EMAIL_KEY, "DefaultUser");
+        Call<DayLogResponse> call = service.putDayLog(copy, userEmail);
+        call.enqueue(new Callback<DayLogResponse>() {
+            @Override
+            public void onResponse(Call<DayLogResponse> call, Response<DayLogResponse> response) {
+                if (response.body() != null) {
+                    Toast.makeText(DoWorkoutActivity.this, response.body().getMessage().toString(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(DoWorkoutActivity.this, "Could not upload results", Toast.LENGTH_LONG).show();
+                }
+            }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.edit().putInt(MainActivity.SEQUENCE_KEY, Sequence.getCurrentValue());
+            @Override
+            public void onFailure(Call<DayLogResponse> call, Throwable t) {
+                Toast.makeText(DoWorkoutActivity.this, "Could not upload results", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override

@@ -16,14 +16,15 @@ public class ProgressPicture extends RealmObject{
 
     }
 
-    // Many to one relationship
-    DayLog dayLog;
-
-    public DayLog getDayLog() {
-        return dayLog;
+    public ProgressPicture(ProgressPicture pp){
+        this.filePath = pp.getFilePath();
     }
 
-    public void setDayLog(DayLog dayLog) {
-        this.dayLog = dayLog;
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 }

@@ -22,6 +22,12 @@ public class BodyLog extends RealmObject{
         this.measurements = measurements;
     }
 
+    public BodyLog(BodyLog bodyLog) {
+        this.weight = bodyLog.getWeight();
+        this.bodyFatPercentage = bodyLog.getBodyFatPercentage();
+        this.measurements = new Measurements(bodyLog.getMeasurements());
+    }
+
     public float getWeight() {
         return weight;
     }

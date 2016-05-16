@@ -15,11 +15,16 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import org.martin.getfreaky.LoginActivity;
 import org.martin.getfreaky.MainActivity;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.Workout;
+import org.martin.getfreaky.network.GetFreakyService;
+import org.martin.getfreaky.network.RetrofitClient;
+import org.martin.getfreaky.network.WorkoutResponse;
 import org.martin.getfreaky.utils.Sequence;
 
 import java.util.ArrayList;
@@ -28,6 +33,9 @@ import java.util.List;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by martin on 2016. 05. 08..
@@ -57,6 +65,7 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
     List<Exercise> deleted;
 
     RealmList<Exercise> exercisesInDB;
+    private String userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +127,9 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
                 showNewExerciseDialog();
             }
         });
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(CreateWorkoutActivity.this);
+        userEmail = preferences.getString(LoginActivity.USER_EMAIL_KEY, "DefaultUser");
     }
 
     private void showNewExerciseDialog() {
@@ -156,6 +168,8 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
         realm.copyToRealm(workoutToEdit);
         realm.commitTransaction();
 
+        putWorkout(workoutToEdit);
+
         intentResult.putExtra(KEY_EDIT_ID, workoutToEdit.getId());
         setResult(RESULT_OK, intentResult);
         finish();
@@ -168,9 +182,11 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
         workoutToEdit.getExercises().removeAll(deleted);
         realm.commitTransaction();
 
+        putWorkout(workoutToEdit);
+
         Intent intentResult = new Intent();
         intentResult.putExtra(KEY_EDIT_INDEX, position);
-        intentResult.putExtra(KEY_EDIT_ID, workoutToEditId);
+        intentResult.putExtra(KEY_EDIT_ID, workoutToEdit.getId());
         setResult(RESULT_OK, intentResult);
         finish();
     }
@@ -207,5 +223,27 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
             return false;
         }
         return true;
+    }
+
+    private void putWorkout(Workout workout) {
+        Workout copy = new Workout(workout);
+        RetrofitClient client = new RetrofitClient();
+        GetFreakyService service = client.createService();
+        Call<WorkoutResponse> call = service.putWorkout(copy, userEmail);
+        call.enqueue(new Callback<WorkoutResponse>() {
+            @Override
+            public void onResponse(Call<WorkoutResponse> call, Response<WorkoutResponse> response) {
+                if (response.body() != null) {
+                    Toast.makeText(CreateWorkoutActivity.this, response.body().getMessage().toString(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(CreateWorkoutActivity.this, "Could not upload workout", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<WorkoutResponse> call, Throwable t) {
+                Toast.makeText(CreateWorkoutActivity.this, "Could not upload workout", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

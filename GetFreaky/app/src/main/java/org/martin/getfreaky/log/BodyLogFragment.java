@@ -12,14 +12,21 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.martin.getfreaky.LoginActivity;
 import org.martin.getfreaky.MyPagerAdapter;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.BodyLog;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Measurements;
+import org.martin.getfreaky.network.DayLogResponse;
+import org.martin.getfreaky.network.GetFreakyService;
+import org.martin.getfreaky.network.RetrofitClient;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class BodyLogFragment extends Fragment {
@@ -49,7 +56,7 @@ public class BodyLogFragment extends Fragment {
         RealmConfiguration config = new RealmConfiguration.Builder(getContext()).build();
         Realm.setDefaultConfiguration(config);
         realm = Realm.getDefaultInstance();
-        DayLog dayLog = realm.where(DayLog.class).equalTo("dayLogId", daylogId).findFirst();
+        final DayLog dayLog = realm.where(DayLog.class).equalTo("dayLogId", daylogId).findFirst();
 
         weight = (EditText) v.findViewById(R.id.weight);
         bodyfat = (EditText) v.findViewById(R.id.bodyfat);
@@ -99,11 +106,36 @@ public class BodyLogFragment extends Fragment {
                 measurements.setCalves(Integer.valueOf(calves.getText().toString()));
 
                 realm.commitTransaction();
+                putDayLog(dayLog);
                 Toast.makeText(v.getContext(), "Body log saved", Toast.LENGTH_LONG).show();
             }
         });
 
         return v;
+    }
+
+    private void putDayLog(DayLog dayLog) {
+        DayLog copy = new DayLog(dayLog);
+        RetrofitClient client = new RetrofitClient();
+        GetFreakyService service = client.createService();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String userEmail = preferences.getString(LoginActivity.USER_EMAIL_KEY, "DefaultUser");
+        Call<DayLogResponse> call = service.putDayLog(copy, userEmail);
+        call.enqueue(new Callback<DayLogResponse>() {
+            @Override
+            public void onResponse(Call<DayLogResponse> call, Response<DayLogResponse> response) {
+                if (response.body() != null) {
+                    Toast.makeText(getContext(), response.body().getMessage().toString(), Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getContext(), "Could not upload body log", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DayLogResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Could not upload body log", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override

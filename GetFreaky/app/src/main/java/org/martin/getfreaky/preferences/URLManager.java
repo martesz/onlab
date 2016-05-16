@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
 
     public class URLManager implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-        public static String BASE_URL;
+        public static String BASE_URL = "http://192.168.1.2:8080/getFreakyService/getFreakyService/";
 
         private String UrlKey;
 

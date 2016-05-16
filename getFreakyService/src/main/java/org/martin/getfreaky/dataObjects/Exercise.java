@@ -2,6 +2,8 @@ package org.martin.getfreaky.dataObjects;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,28 +25,28 @@ import javax.persistence.OneToMany;
 )
 public class Exercise {
 
-    private Long exerciseId;
+    private String exerciseId;
 
     private String name;
     private List<WorkingSet> sets;
-    private Workout workout;
 
     // GSON needs a no-arg constructor
     public Exercise() {
+        exerciseId = UUID.randomUUID().toString();
     }
 
-    public Exercise(String name) {
+    public Exercise(String name) {        
+        exerciseId = UUID.randomUUID().toString();
         this.name = name;
         sets = new ArrayList<WorkingSet>();
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public Long getExerciseId() {
+    public String getExerciseId() {
         return exerciseId;
     }
 
-    public void setExerciseId(Long exerciseId) {
+    public void setExerciseId(String exerciseId) {
         this.exerciseId = exerciseId;
     }
 
@@ -64,19 +66,9 @@ public class Exercise {
         this.sets = sets;
     }
 
-    @OneToMany(mappedBy = "exercise", cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.ALL)
     public List<WorkingSet> getSets() {
         return sets;
-    }
-
-    @JoinColumn(name = "WORKOUTID")
-    @ManyToOne
-    public Workout getWorkout() {
-        return workout;
-    }
-
-    public void setWorkout(Workout workout) {
-        this.workout = workout;
     }
 
     public void removeSet(WorkingSet set) {
@@ -85,5 +77,30 @@ public class Exercise {
 
     public int countSets() {
         return sets.size();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 17 * hash + Objects.hashCode(this.exerciseId);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Exercise other = (Exercise) obj;
+        if (!Objects.equals(this.exerciseId, other.exerciseId)) {
+            return false;
+        }
+        return true;
     }
 }

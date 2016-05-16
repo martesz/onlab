@@ -22,10 +22,8 @@ public class Measurements {
     private int Thighs;
     private int Calves;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long measurementsId;
-    
+    private Long id;
+
     // GSON needs a no argument constructor
     public Measurements() {
     }
@@ -35,17 +33,16 @@ public class Measurements {
             int foreArms, int neck, int hips, int thighs,
             int calves) {
 
-        Chest = chest;
-        Waist = waist;
-        Arms = arms;
-        Shoulders = shoulders;
+        this.Chest = chest;
+        this.Waist = waist;
+        this.Arms = arms;
+        this.Shoulders = shoulders;
         this.foreArms = foreArms;
-        Neck = neck;
-        Hips = hips;
-        Thighs = thighs;
-        Calves = calves;
+        this.Neck = neck;
+        this.Hips = hips;
+        this.Thighs = thighs;
+        this.Calves = calves;
     }
-
 
     public int getChest() {
         return Chest;
@@ -119,12 +116,26 @@ public class Measurements {
         Calves = calves;
     }
 
-    public Long getMeasurementsId() {
-        return measurementsId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public Long getId() {
+        return id;
     }
 
-    public void setMeasurementsId(Long measurementsId) {
-        this.measurementsId = measurementsId;
+    public void setId(Long id) {
+        this.id = id;
     }
-    
+
+    void setValues(Measurements measurements) {
+        Chest = measurements.getChest();
+        Waist = measurements.getWaist();
+        Arms = measurements.getArms();
+        Shoulders = measurements.getShoulders();
+        foreArms = measurements.getForeArms();
+        Neck = measurements.getNeck();
+        Hips = measurements.getHips();
+        Thighs = measurements.getThighs();
+        Calves = measurements.getCalves();
+    }
+
 }
