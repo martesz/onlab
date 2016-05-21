@@ -22,9 +22,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import network.DayLogResponse;
-import network.LoginResponse;
-import network.WorkoutResponse;
+import org.martin.getfreaky.network.DayLogResponse;
+import org.martin.getfreaky.network.LoginResponse;
+import org.martin.getfreaky.network.WorkoutResponse;
 import org.martin.getfreaky.dataObjects.BodyLog;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
@@ -186,11 +186,29 @@ public class GetFreaky {
         return gson.toJson(dayLogs);
     }
 
+    /**
+     * 
+     * @param email The user's email
+     * @param date The date of the DayLog
+     * @return The DayLog adherent to the user and the date
+     */
+    @GET
+    @Path("{email}/dayLogs/{date}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getDayLog(@PathParam("email") String email,
+            @PathParam("date") String date) {
+
+        DayLog dayLog = queryBean.getDayLog(email, date);
+        Gson gson = new Gson();
+        return gson.toJson(dayLog);
+    }
+
     @PUT
     @Path("{email}/dayLogs")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String uploadOrUpdateDaylog(String content, @PathParam("email") String email) {
+        System.out.println(content);
         Gson gson = new Gson();
         DayLog dayLog = gson.fromJson(content, DayLog.class);
         DayLogResponse response = queryBean.insertOrUpdateDayLog(dayLog, email);

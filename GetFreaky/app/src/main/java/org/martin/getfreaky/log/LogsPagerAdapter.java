@@ -21,6 +21,8 @@ public class LogsPagerAdapter extends FragmentPagerAdapter {
                 return new WorkoutResultsFragment();
             case 1:
                 return new BodyLogFragment();
+            case 2:
+                return new ProgressPhotoFragment();
             default:
                 return new WorkoutResultsFragment();
         }
@@ -28,7 +30,7 @@ public class LogsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -38,6 +40,8 @@ public class LogsPagerAdapter extends FragmentPagerAdapter {
                 return "Workout logs";
             case 1:
                 return "Body logs";
+            case 2:
+                return "Progress photo";
             default:
                 return "unknown";
         }

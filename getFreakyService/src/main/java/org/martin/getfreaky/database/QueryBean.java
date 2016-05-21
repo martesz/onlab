@@ -5,21 +5,23 @@
  */
 package org.martin.getfreaky.database;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import network.DayLogResponse;
-import network.LoginResponse;
-import network.WorkoutResponse;
+import org.martin.getfreaky.network.DayLogResponse;
+import org.martin.getfreaky.network.LoginResponse;
+import org.martin.getfreaky.network.WorkoutResponse;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.ProgressPicture;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
+import org.martin.getfreaky.utils.Password;
 
 @Stateless
 public class QueryBean {
@@ -48,12 +50,13 @@ public class QueryBean {
     public LoginResponse signInOrRegisterUser(User user) {
         User existingUser = em.find(User.class, user.getEmail());
         if (existingUser != null) {
-            if (user.getPassword().equals(existingUser.getPassword())) {
+            if (Password.equals(user.getPassword(), existingUser.getPassword())) {
                 return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
             } else {
                 return new LoginResponse(LoginResponse.ResponseMessage.WRONG_PASSWORD);
             }
         } else {
+            user.setPassword(Password.getHash(user.getPassword()));
             em.persist(user);
             return new LoginResponse(LoginResponse.ResponseMessage.USER_REGISTERED);
         }
@@ -160,6 +163,29 @@ public class QueryBean {
 
         }
         return new WorkoutResponse(WorkoutResponse.ResponseMessage.SOMETHING_WENT_WRONG);
+    }
+
+    /**
+     *
+     * @param email User email
+     * @param date DayLog date
+     * @return If there is a DayLog of that date and user return it, if there is
+     * not match return empty DayLog
+     */
+    public DayLog getDayLog(String email, String date) {
+        User user = em.find(User.class, email);
+        if (user != null) {
+            SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+            for (DayLog dl : user.getDayLogs()) {
+                String actDate = fmt.format(dl.getDate());
+                if (date.equals(actDate)) {
+                    return dl;
+                }
+            }
+            return new DayLog();
+        } else {
+            return new DayLog();
+        }
     }
 
 }

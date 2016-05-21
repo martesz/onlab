@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Get Freaky</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script name="jquery/jquery.js" library="primefaces"></script>
+    </h:head>
+    <h:body>
+        <div>Logged in as : #{logBean.email}</div>
+        <h:form>
+            <p:calendar value="#{logBean.date}"  >
+                <p:ajax event="dateSelect" listener="#{logBean.dateSelected}" update="@(.updateList)"/>
+            </p:calendar>
+        </h:form>
+        <h:outputLabel value="#{logBean.output}"/>
+        <h:form>
+            <p:dataList value="#{logBean.workoutResults}" var="result" type="ordered" styleClass="updateList">
+                <f:facet name="header">
+                    Workout results
+                </f:facet>
+                #{result}
+            </p:dataList>
+        </h:form>
+    </h:body>
+</html>

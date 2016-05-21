@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -16,7 +13,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 
 /**
- * Created by martin on 2016. 04. 20.. This class represents the activity of the
+ * Created by martin on 2016. 04. 20. This class represents the activity of the
  * user on one day
  */
 @Entity
@@ -44,6 +41,9 @@ public class DayLog {
     // Only for GSON
     public DayLog() {
         dayLogId = UUID.randomUUID().toString();
+        progressPictures = new ArrayList<>();
+        workoutResults = new ArrayList<>();
+        bodylog = new BodyLog();
     }
 
     public DayLog(Date date) {

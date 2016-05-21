@@ -37,6 +37,7 @@ import org.martin.getfreaky.network.DayLogResponse;
 import org.martin.getfreaky.network.GetFreakyService;
 import org.martin.getfreaky.network.LoginResponse;
 import org.martin.getfreaky.network.RetrofitClient;
+import org.martin.getfreaky.utils.Password;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -358,6 +359,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 if (response != null) {
                     if (response.getMessage() == LoginResponse.ResponseMessage.USER_REGISTERED ||
                             response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
+                        // Sent the password in plain text, because later I will use SSL and
+                        // it is better to hash on the server
+                        String hashedPassword = Password.getHash(mPassword);
+                        newUser.setPassword(hashedPassword);
                         createDaylog(newUser);
                         realm.beginTransaction();
                         realm.copyToRealm(newUser);
@@ -375,7 +380,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } else {
                 // If the user exists in the DB, do not need to check it on the server
                 // Check the password
-                if (user.getPassword().equals(mPassword)) {
+                if (Password.equals(mPassword, user.getPassword())) {
                     createDaylog(user);
                     saveUserInPreferences(mEmail, mPassword);
                     realm.close();
@@ -399,8 +404,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             try {
                 List<DayLog> dayLogsOnServer = call.execute().body();
-                for(DayLog dayLog : dayLogsOnServer){
-                    if(!dayLogs.contains(dayLog)){
+                for (DayLog dayLog : dayLogsOnServer) {
+                    if (!dayLogs.contains(dayLog)) {
                         realm.beginTransaction();
                         dayLogs.add(dayLog);
                         realm.commitTransaction();
