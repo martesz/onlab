@@ -35,8 +35,9 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class LogBean {
 
-    public static final String BASE_URL = "http://localhost:8080/getFreakyService/getFreakyService/";
+    public static final String BASE_URL = "http://localhost:10516/getFreakyService/getFreakyService/";
 
+    private String userId;
     private String email;
     private String password;
     private String loginResult;
@@ -109,14 +110,15 @@ public class LogBean {
         user.setPassword(password);
         Gson gson = new Gson();
         Response response = client.target(BASE_URL)
-                .path("signInOrRegister")
+                .path("signInOrRegisterEmail")
                 .request()
                 .put(Entity.entity(user, MediaType.APPLICATION_JSON));
         String responseEntity = response.readEntity(String.class);
         LoginResponse lr = gson.fromJson(responseEntity, LoginResponse.class);
-
+        
         if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
                 || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
+            userId = lr.getAssignedUserId();
             return "loginSuccesful";
         } else {
             // Login not succesful
@@ -134,7 +136,7 @@ public class LogBean {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
         Client client = ClientBuilder.newClient();
         Gson gson = new Gson();
-        String path = email + "/dayLogs/" + fmt.format(date);
+        String path = userId + "/dayLogs/" + fmt.format(date);
         System.out.println(path);
         Response response = client.target(BASE_URL)
                 .path(path)

@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import io.realm.BaseRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
@@ -72,8 +73,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             "foo@example.com:hello", "bar@example.com:world"
     };
 
-    public static String USER_EMAIL_KEY = "user";
-    public static String USER_PASSWORD_KEY = "password";
+    public static String USER_ID_KEY = "user";
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -363,12 +363,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         // it is better to hash on the server
                         String hashedPassword = Password.getHash(mPassword);
                         newUser.setPassword(hashedPassword);
-                        createDaylog(newUser);
-                        realm.beginTransaction();
-                        realm.copyToRealm(newUser);
-                        realm.commitTransaction();
-                        saveUserInPreferences(mEmail, mPassword);
-                        realm.close();
+                        storeUser(newUser, response, realm);
                         return true;
                     } else {
                         return false;
@@ -381,8 +376,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 // If the user exists in the DB, do not need to check it on the server
                 // Check the password
                 if (Password.equals(mPassword, user.getPassword())) {
-                    createDaylog(user);
-                    saveUserInPreferences(mEmail, mPassword);
+                    createDaylog(user, realm);
+                    saveUserInPreferences(user.getId());
                     realm.close();
                     response = new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
                     return true;
@@ -395,81 +390,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         }
 
-        private void createDaylog(User user) {
-            RealmList<DayLog> dayLogs = user.getDayLogs();
-
-            RetrofitClient client = new RetrofitClient();
-            GetFreakyService service = client.createService();
-            Call<List<DayLog>> call = service.getDayLogs(user.getEmail());
-
-            try {
-                List<DayLog> dayLogsOnServer = call.execute().body();
-                for (DayLog dayLog : dayLogsOnServer) {
-                    if (!dayLogs.contains(dayLog)) {
-                        realm.beginTransaction();
-                        dayLogs.add(dayLog);
-                        realm.commitTransaction();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            // Get or create a daylog for today
-            Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
-            String currentDay = fmt.format(calendar.getTime());
-
-            DayLog dayLog = null;
-
-            for (DayLog dl : dayLogs) {
-                if (fmt.format(dl.getDate()).equals(currentDay)) {
-                    dayLog = dl;
-                }
-            }
-            if (dayLog == null) {
-                dayLog = new DayLog(calendar.getTime());
-                realm.beginTransaction();
-                user.getDayLogs().add(dayLog);
-                realm.commitTransaction();
-                Call<DayLogResponse> dayLogCall = service.putDayLog(dayLog, user.getEmail());
-                try {
-                    DayLogResponse dlr = dayLogCall.execute().body();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
-            preferences.edit().putString(CURRENT_DAYLOG_ID_KEY, dayLog.getDayLogId()).apply();
-        }
-
-        private void saveUserInPreferences(String email, String password) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
-            preferences.edit().putString(USER_EMAIL_KEY, email).apply();
-            preferences.edit().putString(USER_PASSWORD_KEY, password).apply();
-        }
-
-
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
-
-            if (success) {
-                finish();
-                Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
-                LoginActivity.this.startActivity(myIntent);
-            } else {
-                if (response != null) {
-                    if (response.getMessage() == LoginResponse.ResponseMessage.WRONG_PASSWORD) {
-                        mPasswordView.setError(getString(R.string.error_incorrect_password));
-                        mPasswordView.requestFocus();
-                    } else {
-                        Toast.makeText(LoginActivity.this, response.getMessage().toString(), Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
+            handleResult(success);
 
         }
 
@@ -478,6 +403,88 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+
+    private void storeUser(User user, LoginResponse response, Realm realm) {
+        user.setId(response.getAssignedUserId());
+        createDaylog(user, realm);
+        realm.beginTransaction();
+        realm.copyToRealm(user);
+        realm.commitTransaction();
+        saveUserInPreferences(user.getId());
+        realm.close();
+    }
+
+    private void handleResult(Boolean success) {
+        if (success) {
+            finish();
+            Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
+            LoginActivity.this.startActivity(myIntent);
+        } else {
+            if (response != null) {
+                if (response.getMessage() == LoginResponse.ResponseMessage.WRONG_PASSWORD) {
+                    mPasswordView.setError(getString(R.string.error_incorrect_password));
+                    mPasswordView.requestFocus();
+                } else {
+                    Toast.makeText(LoginActivity.this, response.getMessage().toString(), Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    private void saveUserInPreferences(String userId) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+        preferences.edit().putString(USER_ID_KEY, userId).apply();
+    }
+
+    private void createDaylog(User user, BaseRealm realm) {
+        RealmList<DayLog> dayLogs = user.getDayLogs();
+
+        RetrofitClient client = new RetrofitClient();
+        GetFreakyService service = client.createService();
+        Call<List<DayLog>> call = service.getDayLogs(user.getId());
+
+        try {
+            List<DayLog> dayLogsOnServer = call.execute().body();
+            for (DayLog dayLog : dayLogsOnServer) {
+                if (!dayLogs.contains(dayLog)) {
+                    realm.beginTransaction();
+                    dayLogs.add(dayLog);
+                    realm.commitTransaction();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Get or create a daylog for today
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+        String currentDay = fmt.format(calendar.getTime());
+
+        DayLog dayLog = null;
+
+        for (DayLog dl : dayLogs) {
+            if (fmt.format(dl.getDate()).equals(currentDay)) {
+                dayLog = dl;
+            }
+        }
+        if (dayLog == null) {
+            dayLog = new DayLog(calendar.getTime());
+            realm.beginTransaction();
+            user.getDayLogs().add(dayLog);
+            realm.commitTransaction();
+            Call<DayLogResponse> dayLogCall = service.putDayLog(dayLog, user.getId());
+            try {
+                DayLogResponse dlr = dayLogCall.execute().body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this);
+        preferences.edit().putString(CURRENT_DAYLOG_ID_KEY, dayLog.getDayLogId()).apply();
     }
 }
 

@@ -174,8 +174,8 @@ public class DoWorkoutActivity extends AppCompatActivity {
         RetrofitClient client = new RetrofitClient();
         GetFreakyService service = client.createService();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(DoWorkoutActivity.this);
-        String userEmail = preferences.getString(LoginActivity.USER_EMAIL_KEY, "DefaultUser");
-        Call<DayLogResponse> call = service.putDayLog(copy, userEmail);
+        String userId = preferences.getString(LoginActivity.USER_ID_KEY, "DefaultUser");
+        Call<DayLogResponse> call = service.putDayLog(copy, userId);
         call.enqueue(new Callback<DayLogResponse>() {
             @Override
             public void onResponse(Call<DayLogResponse> call, Response<DayLogResponse> response) {

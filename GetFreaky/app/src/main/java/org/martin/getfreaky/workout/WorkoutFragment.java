@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -25,7 +24,6 @@ import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.network.GetFreakyService;
 import org.martin.getfreaky.network.RetrofitClient;
 import org.martin.getfreaky.network.WorkoutResponse;
-import org.martin.getfreaky.preferences.URLManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +34,6 @@ import io.realm.RealmList;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by martin on 2016. 05. 07..
@@ -51,7 +47,6 @@ public class WorkoutFragment extends Fragment {
     public static final int CONTEXT_ACTION_EDIT = 11;
     public static final int CONTEXT_ACTION_DO_WORKOUT = 12;
 
-    private Retrofit retrofit;
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     private ListView listView;
@@ -59,40 +54,24 @@ public class WorkoutFragment extends Fragment {
     private FloatingActionButton fab;
     private Realm realm;
     private User user;
-    private String userEmail;
+    private String userId;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_workout, null);
 
-        SharedPreferences myPrefs = PreferenceManager.getDefaultSharedPreferences(rootView.getContext());
-        String baseKey = getResources().getString(R.string.BASE_URL_KEY);
-        URLManager.BASE_URL = myPrefs.getString((baseKey)
-                , "http://192.168.1.2:8080/getFreakyService/");
-        listener = new URLManager(baseKey);
-        myPrefs.registerOnSharedPreferenceChangeListener(listener);
-
-        try {
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(URLManager.BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-        } catch (Exception e) {
-            Log.e("Error", e.getMessage());
-        }
-
         RealmConfiguration config = new RealmConfiguration.Builder(getContext()).build();
         Realm.setDefaultConfiguration(config);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        userEmail = preferences.getString(LoginActivity.USER_EMAIL_KEY, "DefaultUser");
+        userId = preferences.getString(LoginActivity.USER_ID_KEY, "DefaultUser");
 
         realm = Realm.getDefaultInstance();
         realm.beginTransaction();
         List<Workout> workouts = new ArrayList<Workout>();
         user = realm.where(User.class)
-                .equalTo("email", userEmail)
+                .equalTo("id", userId)
                 .findFirst();
         RealmList<Workout> workoutRealmResults = user.getWorkouts();
         workouts.addAll(workoutRealmResults);
@@ -115,13 +94,13 @@ public class WorkoutFragment extends Fragment {
 
         RetrofitClient client = new RetrofitClient();
         GetFreakyService service = client.createService();
-        Call<List<Workout>> call = service.getWorkouts(user.getEmail());
+        Call<List<Workout>> call = service.getWorkouts(user.getId());
         call.enqueue(new Callback<List<Workout>>() {
             @Override
             public void onResponse(Call<List<Workout>> call, Response<List<Workout>> response) {
                 List<Workout> workouts = new ArrayList<Workout>();
                 user = realm.where(User.class)
-                        .equalTo("email", userEmail)
+                        .equalTo("id", userId)
                         .findFirst();
                 RealmList<Workout> workoutRealmResults = user.getWorkouts();
                 for (Workout workout : response.body()) {
@@ -265,7 +244,7 @@ public class WorkoutFragment extends Fragment {
         Workout copy = new Workout(workout);
         RetrofitClient client = new RetrofitClient();
         GetFreakyService service = client.createService();
-        Call<WorkoutResponse> call = service.deleteWorkout(userEmail, copy.getId());
+        Call<WorkoutResponse> call = service.deleteWorkout(userId, copy.getId());
         call.enqueue(new Callback<WorkoutResponse>() {
             @Override
             public void onResponse(Call<WorkoutResponse> call, Response<WorkoutResponse> response) {

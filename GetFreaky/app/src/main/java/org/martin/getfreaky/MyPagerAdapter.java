@@ -64,10 +64,10 @@ public class MyPagerAdapter  extends FragmentPagerAdapter {
                 Realm.setDefaultConfiguration(config);
                 Realm realm = Realm.getDefaultInstance();
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-                String email = preferences.getString(LoginActivity.USER_EMAIL_KEY, "NO_USER");
+                String userId = preferences.getString(LoginActivity.USER_ID_KEY, "NO_USER");
                 realm.beginTransaction();
                 User user = realm.where(User.class)
-                        .equalTo("email", email)
+                        .equalTo("id", userId)
                         .findFirst();
 
                 SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
@@ -93,10 +93,10 @@ public class MyPagerAdapter  extends FragmentPagerAdapter {
         Realm realm = Realm.getDefaultInstance();
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String email = preferences.getString(LoginActivity.USER_EMAIL_KEY, "NO_USER");
+        String userId = preferences.getString(LoginActivity.USER_ID_KEY, "NO_USER");
         realm.beginTransaction();
         User user = realm.where(User.class)
-                .equalTo("email", email)
+                .equalTo("id", userId)
                 .findFirst();
 
         for(DayLog dl : user.getDayLogs()){

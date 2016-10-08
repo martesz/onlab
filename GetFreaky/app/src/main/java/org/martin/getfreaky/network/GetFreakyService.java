@@ -24,21 +24,21 @@ public interface GetFreakyService {
     @GET("getFreakyService")
     Call<Exercise> getExercise();
 
-    @PUT("signInOrRegister")
+    @PUT("signInOrRegisterEmail")
     Call<LoginResponse> signInOrRegisterUser(@Body User user);
 
-    @GET("{email}/workouts")
-    Call<List<Workout>> getWorkouts(@Path("email") String email);
+    @GET("{userId}/workouts")
+    Call<List<Workout>> getWorkouts(@Path("userId") String userId);
 
-    @PUT("{email}/workouts")
-    Call<WorkoutResponse> putWorkout(@Body Workout workout, @Path("email") String email);
+    @PUT("{userId}/workouts")
+    Call<WorkoutResponse> putWorkout(@Body Workout workout, @Path("userId") String userId);
 
-    @DELETE("{email}/workouts/{workoutId}")
-    Call<WorkoutResponse> deleteWorkout(@Path("email") String email, @Path("workoutId") String workoutId);
+    @DELETE("{userId}/workouts/{workoutId}")
+    Call<WorkoutResponse> deleteWorkout(@Path("userId") String userId, @Path("workoutId") String workoutId);
 
-    @GET("{email}/dayLogs")
-    Call<List<DayLog>> getDayLogs(@Path("email") String email);
+    @GET("{userId}/dayLogs")
+    Call<List<DayLog>> getDayLogs(@Path("userId") String userId);
 
-    @PUT("{email}/dayLogs")
-    Call<DayLogResponse> putDayLog(@Body DayLog dayLog, @Path("email") String email);
+    @PUT("{userId}/dayLogs")
+    Call<DayLogResponse> putDayLog(@Body DayLog dayLog, @Path("userId") String userId);
 }

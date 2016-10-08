@@ -126,15 +126,14 @@ public class GetFreaky {
     }
 
     @PUT
-    @Path("signInOrRegister")
+    @Path("signInOrRegisterEmail")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String signInOrRegisterUser(String content) {
+    public String signInOrRegisterWithEmail(String content) {
         Gson gson = new Gson();
         User user = gson.fromJson(content, User.class);
         LoginResponse response;
         if (user.getEmail() != null) {
-            System.out.println(user.getEmail());
             response = queryBean.signInOrRegisterUser(user);
         } else {
             response = new LoginResponse(LoginResponse.ResponseMessage.EMAIL_NULL);
@@ -144,74 +143,74 @@ public class GetFreaky {
 
     /**
      *
-     * @param email The user's email
+     * @param userId The user's email
      * @return The user's workouts
      */
     @GET
-    @Path("{email}/workouts")
+    @Path("{userId}/workouts")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getWorkouts(@PathParam("email") String email) {
-        List<Workout> workouts = queryBean.getWorkouts(email);
+    public String getWorkouts(@PathParam("userId") String userId) {
+        List<Workout> workouts = queryBean.getWorkouts(userId);
         Gson gson = new Gson();
         return gson.toJson(workouts);
     }
 
     @PUT
-    @Path("{email}/workouts")
+    @Path("{userId}/workouts")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String uploadOrUpdateWorkout(String content, @PathParam("email") String email) {
+    public String uploadOrUpdateWorkout(String content, @PathParam("userId") String userId) {
         Gson gson = new Gson();
         Workout workout = gson.fromJson(content, Workout.class);
-        WorkoutResponse response = queryBean.insertOrUpdateWorkout(workout, email);
+        WorkoutResponse response = queryBean.insertOrUpdateWorkout(workout, userId);
         return gson.toJson(response);
     }
 
     @DELETE
-    @Path("{email}/workouts/{workoutId}")
+    @Path("{userId}/workouts/{workoutId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String deleteWorkout(@PathParam("email") String email, @PathParam("workoutId") String workoutId) {
+    public String deleteWorkout(@PathParam("userId") String userId, @PathParam("workoutId") String workoutId) {
         Gson gson = new Gson();
-        WorkoutResponse response = queryBean.deleteWorkout(workoutId, email);
+        WorkoutResponse response = queryBean.deleteWorkout(workoutId, userId);
         return gson.toJson(response);
     }
 
     @GET
-    @Path("{email}/dayLogs")
+    @Path("{userId}/dayLogs")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getDayLogs(@PathParam("email") String email) {
-        List<DayLog> dayLogs = queryBean.getDayLogs(email);
+    public String getDayLogs(@PathParam("userId") String userId) {
+        List<DayLog> dayLogs = queryBean.getDayLogs(userId);
         Gson gson = new Gson();
         return gson.toJson(dayLogs);
     }
 
     /**
      * 
-     * @param email The user's email
+     * @param userId The user's email
      * @param date The date of the DayLog
      * @return The DayLog adherent to the user and the date
      */
     @GET
-    @Path("{email}/dayLogs/{date}")
+    @Path("{userId}/dayLogs/{date}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String getDayLog(@PathParam("email") String email,
+    public String getDayLog(@PathParam("userId") String userId,
             @PathParam("date") String date) {
 
-        DayLog dayLog = queryBean.getDayLog(email, date);
+        DayLog dayLog = queryBean.getDayLog(userId, date);
         Gson gson = new Gson();
         return gson.toJson(dayLog);
     }
 
     @PUT
-    @Path("{email}/dayLogs")
+    @Path("{userId}/dayLogs")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public String uploadOrUpdateDaylog(String content, @PathParam("email") String email) {
+    public String uploadOrUpdateDaylog(String content, @PathParam("userId") String userId) {
         System.out.println(content);
         Gson gson = new Gson();
         DayLog dayLog = gson.fromJson(content, DayLog.class);
-        DayLogResponse response = queryBean.insertOrUpdateDayLog(dayLog, email);
+        DayLogResponse response = queryBean.insertOrUpdateDayLog(dayLog, userId);
         return gson.toJson(response);
     }
 

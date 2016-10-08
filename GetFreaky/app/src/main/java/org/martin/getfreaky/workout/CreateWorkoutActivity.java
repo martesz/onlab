@@ -65,7 +65,7 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
     List<Exercise> deleted;
 
     RealmList<Exercise> exercisesInDB;
-    private String userEmail;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +129,7 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
         });
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(CreateWorkoutActivity.this);
-        userEmail = preferences.getString(LoginActivity.USER_EMAIL_KEY, "DefaultUser");
+        userId = preferences.getString(LoginActivity.USER_ID_KEY, "DefaultUser");
     }
 
     private void showNewExerciseDialog() {
@@ -229,7 +229,7 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
         Workout copy = new Workout(workout);
         RetrofitClient client = new RetrofitClient();
         GetFreakyService service = client.createService();
-        Call<WorkoutResponse> call = service.putWorkout(copy, userEmail);
+        Call<WorkoutResponse> call = service.putWorkout(copy, userId);
         call.enqueue(new Callback<WorkoutResponse>() {
             @Override
             public void onResponse(Call<WorkoutResponse> call, Response<WorkoutResponse> response) {

@@ -9,12 +9,22 @@ public class LoginResponse {
     }
 
     private ResponseMessage message;
+    private String assignedUserId;
 
     public LoginResponse(ResponseMessage message) {
         this.message = message;
     }
 
+    public LoginResponse(ResponseMessage message, String assignedUserId) {
+        this.message = message;
+        this.assignedUserId = assignedUserId;
+    }
+
     public ResponseMessage getMessage() {
         return message;
+    }
+
+    public String getAssignedUserId() {
+        return assignedUserId;
     }
 }

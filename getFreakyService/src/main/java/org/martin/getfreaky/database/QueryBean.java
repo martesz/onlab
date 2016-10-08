@@ -11,13 +11,13 @@ import java.util.Iterator;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import org.martin.getfreaky.network.DayLogResponse;
 import org.martin.getfreaky.network.LoginResponse;
 import org.martin.getfreaky.network.WorkoutResponse;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
-import org.martin.getfreaky.dataObjects.ProgressPicture;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
@@ -48,17 +48,21 @@ public class QueryBean {
 
     // If the user exists and the password is wrong returns false, else returns true
     public LoginResponse signInOrRegisterUser(User user) {
-        User existingUser = em.find(User.class, user.getEmail());
-        if (existingUser != null) {
+        try {
+            User existingUser = (User) em.createQuery("SELECT u from User u where u.email = :email")
+                    .setParameter("email", user.getEmail())
+                    .getSingleResult();
+
             if (Password.equals(user.getPassword(), existingUser.getPassword())) {
-                return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
+                return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN, existingUser.getId());
             } else {
                 return new LoginResponse(LoginResponse.ResponseMessage.WRONG_PASSWORD);
             }
-        } else {
+        } catch (NoResultException nre) {
+            String userId = user.generateUniqueId();
             user.setPassword(Password.getHash(user.getPassword()));
             em.persist(user);
-            return new LoginResponse(LoginResponse.ResponseMessage.USER_REGISTERED);
+            return new LoginResponse(LoginResponse.ResponseMessage.USER_REGISTERED, userId);
         }
     }
 
@@ -80,8 +84,8 @@ public class QueryBean {
         return em.find(WorkingSet.class, id);
     }
 
-    public List<Workout> getWorkouts(String email) {
-        User user = em.find(User.class, email);
+    public List<Workout> getWorkouts(String userId) {
+        User user = em.find(User.class, userId);
         if (user != null) {
             return user.getWorkouts();
         } else {
@@ -89,10 +93,10 @@ public class QueryBean {
         }
     }
 
-    public WorkoutResponse insertOrUpdateWorkout(Workout workout, String email) {
+    public WorkoutResponse insertOrUpdateWorkout(Workout workout, String userId) {
         Workout existing = em.find(Workout.class, workout.getId());
         if (existing == null) {
-            User user = em.find(User.class, email);
+            User user = em.find(User.class, userId);
             user.getWorkouts().add(workout);
             return new WorkoutResponse(WorkoutResponse.ResponseMessage.WORKOUT_UPLOADED);
         } else {
@@ -104,8 +108,8 @@ public class QueryBean {
         }
     }
 
-    public List<DayLog> getDayLogs(String email) {
-        User user = em.find(User.class, email);
+    public List<DayLog> getDayLogs(String userId) {
+        User user = em.find(User.class, userId);
         if (user != null) {
             return user.getDayLogs();
         } else {
@@ -113,10 +117,10 @@ public class QueryBean {
         }
     }
 
-    public DayLogResponse insertOrUpdateDayLog(DayLog dayLog, String email) {
+    public DayLogResponse insertOrUpdateDayLog(DayLog dayLog, String userId) {
         DayLog existing = em.find(DayLog.class, dayLog.getDayLogId());
         if (existing == null) {
-            User user = em.find(User.class, email);
+            User user = em.find(User.class, userId);
             if (user != null) {
                 user.getDayLogs().add(dayLog);
                 return new DayLogResponse(DayLogResponse.ResponseMessage.DAYLOG_UPLOADED);
@@ -146,8 +150,8 @@ public class QueryBean {
         }
     }
 
-    public WorkoutResponse deleteWorkout(String workoutId, String email) {
-        User user = em.find(User.class, email);
+    public WorkoutResponse deleteWorkout(String workoutId, String userId) {
+        User user = em.find(User.class, userId);
         if (user == null) {
             return new WorkoutResponse(WorkoutResponse.ResponseMessage.SOMETHING_WENT_WRONG);
         } else {
@@ -167,13 +171,13 @@ public class QueryBean {
 
     /**
      *
-     * @param email User email
+     * @param userId User email
      * @param date DayLog date
      * @return If there is a DayLog of that date and user return it, if there is
      * not match return empty DayLog
      */
-    public DayLog getDayLog(String email, String date) {
-        User user = em.find(User.class, email);
+    public DayLog getDayLog(String userId, String date) {
+        User user = em.find(User.class, userId);
         if (user != null) {
             SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
             for (DayLog dl : user.getDayLogs()) {
