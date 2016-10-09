@@ -107,4 +107,6 @@
     <string name="thighs">Thighs</string>
     <string name="calves">Calves</string>
     <string name="save">Save</string>
+    <string name="google_server_client_id">184243885869-enlbqgos6p3t9fqujkh89squibv04ncu.apps.googleusercontent.com</string>
+    <string name="facebook_app_id">767706113368797</string>
 </resources>

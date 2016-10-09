@@ -21,6 +21,7 @@ import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
+import org.martin.getfreaky.utils.GoogleSignIn;
 import org.martin.getfreaky.utils.Password;
 
 @Stateless
@@ -63,6 +64,40 @@ public class QueryBean {
             user.setPassword(Password.getHash(user.getPassword()));
             em.persist(user);
             return new LoginResponse(LoginResponse.ResponseMessage.USER_REGISTERED, userId);
+        }
+    }
+
+    public LoginResponse signInOrRegisterGoogle(User user) {
+        if (user != null) {
+            try {
+                User existingUser = (User) em.createQuery("SELECT u from User u where u.googleId = :googleId")
+                        .setParameter("googleId", user.getGoogleId())
+                        .getSingleResult();
+                return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN, existingUser.getId());
+            } catch (NoResultException nre) {
+                user.generateUniqueId();
+                em.persist(user);
+                return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN, user.getId());
+            }
+        } else {
+            return new LoginResponse(LoginResponse.ResponseMessage.WRONG_GOOGLE_ID_TOKEN);
+        }
+    }
+
+    public LoginResponse signInOrRegisterFacebook(User user) {
+        if (user != null) {
+            try {
+                User existingUser = (User) em.createQuery("SELECT u from User u where u.facebookId = :facebookId")
+                        .setParameter("facebookId", user.getFacebookId())
+                        .getSingleResult();
+                return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN, existingUser.getId());
+            } catch (NoResultException nre) {
+                user.generateUniqueId();
+                em.persist(user);
+                return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN, user.getId());
+            }
+        } else {
+            return new LoginResponse(LoginResponse.ResponseMessage.WRONG_FACEBOOK_ACCESS_TOKEN);
         }
     }
 

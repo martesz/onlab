@@ -5,7 +5,8 @@ package org.martin.getfreaky.network;
  */
 public class LoginResponse {
     public enum ResponseMessage {
-        USER_REGISTERED, USER_SIGNED_IN, WRONG_PASSWORD, EMAIL_NULL, COULD_NOT_CONNECT
+        USER_REGISTERED, USER_SIGNED_IN, WRONG_PASSWORD,
+        EMAIL_NULL, COULD_NOT_CONNECT, WRONG_GOOGLE_ID_TOKEN, WRONG_FACEBOOK_ACCESS_TOKEN
     }
 
     private ResponseMessage message;

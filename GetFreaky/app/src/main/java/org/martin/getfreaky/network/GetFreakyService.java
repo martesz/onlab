@@ -27,6 +27,12 @@ public interface GetFreakyService {
     @PUT("signInOrRegisterEmail")
     Call<LoginResponse> signInOrRegisterUser(@Body User user);
 
+    @PUT("signInOrRegisterGoogleAndroid")
+    Call<LoginResponse> signInOrRegisterGoogle(@Body String googleIdToken);
+
+    @PUT("signInOrRegisterFacebook")
+    Call<LoginResponse> signInOrRegisterFacebook(@Body String facebookAccessToken);
+
     @GET("{userId}/workouts")
     Call<List<Workout>> getWorkouts(@Path("userId") String userId);
 

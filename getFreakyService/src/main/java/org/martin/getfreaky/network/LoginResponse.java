@@ -16,7 +16,8 @@ import java.io.Serializable;
 public class LoginResponse implements Serializable{
 
     public enum ResponseMessage {
-        USER_REGISTERED, USER_SIGNED_IN, WRONG_PASSWORD, EMAIL_NULL
+        USER_REGISTERED, USER_SIGNED_IN, WRONG_PASSWORD,
+        EMAIL_NULL, WRONG_GOOGLE_ID_TOKEN, WRONG_FACEBOOK_ACCESS_TOKEN
     }
 
     private ResponseMessage message;

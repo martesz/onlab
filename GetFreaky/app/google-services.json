@@ -1,0 +1,52 @@
+{
+  "project_info": {
+    "project_number": "184243885869",
+    "project_id": "getfreaky-143406"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:184243885869:android:c084d293d1852a77",
+        "android_client_info": {
+          "package_name": "org.martin.getfreaky"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "184243885869-pvf05vtch9os36p5tetm951fflfu2mas.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.martin.getfreaky",
+            "certificate_hash": "C099C4347B214E37E1B882DD8B1CD8523A69B5ED"
+          }
+        },
+        {
+          "client_id": "184243885869-enlbqgos6p3t9fqujkh89squibv04ncu.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "184243885869-65g68jc9lbuv89093ncuc5vt0fj8p78q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJPRYpmQunFtvI2ckjmpH-pYlwd9qYsrA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

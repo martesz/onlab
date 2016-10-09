@@ -33,6 +33,8 @@ import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.database.QueryBean;
+import org.martin.getfreaky.utils.FacebookLogin;
+import org.martin.getfreaky.utils.GoogleSignIn;
 
 /**
  * Root resource (exposed at "getFreakyServiceworld" path)
@@ -141,6 +143,39 @@ public class GetFreaky {
         return gson.toJson(response);
     }
 
+    @PUT
+    @Path("signInOrRegisterGoogle")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String signInOrRegisterWithGoogle(String googleIdToken) {
+        Gson gson = new Gson();
+        User user = GoogleSignIn.authenticateWeb(googleIdToken);
+        LoginResponse response = queryBean.signInOrRegisterGoogle(user);
+        return gson.toJson(response);
+    }
+
+    @PUT
+    @Path("signInOrRegisterGoogleAndroid")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String signInOrRegisterWithGoogleAndroid(String googleIdToken) {
+        Gson gson = new Gson();
+        User user = GoogleSignIn.authenticateAndroid(googleIdToken);
+        LoginResponse response = queryBean.signInOrRegisterGoogle(user);
+        return gson.toJson(response);
+    }
+
+    @PUT
+    @Path("signInOrRegisterFacebook")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String signInOrRegisterWithFacebook(String facebookAccessToken) {
+        Gson gson = new Gson();
+        User user = FacebookLogin.login(facebookAccessToken);
+        LoginResponse response = queryBean.signInOrRegisterFacebook(user);
+        return gson.toJson(response);
+    }
+
     /**
      *
      * @param userId The user's email
@@ -186,7 +221,7 @@ public class GetFreaky {
     }
 
     /**
-     * 
+     *
      * @param userId The user's email
      * @param date The date of the DayLog
      * @return The DayLog adherent to the user and the date

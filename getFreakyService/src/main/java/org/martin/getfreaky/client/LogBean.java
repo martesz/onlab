@@ -40,6 +40,9 @@ public class LogBean {
     private String userId;
     private String email;
     private String password;
+    private String googleIdToken;
+    private String facebookAccessToken;
+
     private String loginResult;
 
     // The selected date
@@ -115,11 +118,53 @@ public class LogBean {
                 .put(Entity.entity(user, MediaType.APPLICATION_JSON));
         String responseEntity = response.readEntity(String.class);
         LoginResponse lr = gson.fromJson(responseEntity, LoginResponse.class);
-        
+
         if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
                 || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
             userId = lr.getAssignedUserId();
-            return "loginSuccesful";
+            return "loginSuccessful";
+        } else {
+            // Login not succesful
+            loginResult = lr.getMessage().toString();
+            return null;
+        }
+    }
+
+    public String googleSignIn() {
+        Client client = ClientBuilder.newClient();
+        Gson gson = new Gson();
+        Response response = client.target(BASE_URL)
+                .path("signInOrRegisterGoogle")
+                .request()
+                .put(Entity.entity(googleIdToken, MediaType.TEXT_PLAIN));
+        String responseEntity = response.readEntity(String.class);
+        LoginResponse lr = gson.fromJson(responseEntity, LoginResponse.class);
+
+        if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
+                || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
+            userId = lr.getAssignedUserId();
+            return "loginSuccessful";
+        } else {
+            // Login not succesful
+            loginResult = lr.getMessage().toString();
+            return null;
+        }
+    }
+    
+    public String facebookSignIn() {
+        Client client = ClientBuilder.newClient();
+        Gson gson = new Gson();
+        Response response = client.target(BASE_URL)
+                .path("signInOrRegisterFacebook")
+                .request()
+                .put(Entity.entity(facebookAccessToken, MediaType.TEXT_PLAIN));
+        String responseEntity = response.readEntity(String.class);
+        LoginResponse lr = gson.fromJson(responseEntity, LoginResponse.class);
+
+        if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
+                || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
+            userId = lr.getAssignedUserId();
+            return "loginSuccessful";
         } else {
             // Login not succesful
             loginResult = lr.getMessage().toString();
@@ -161,6 +206,37 @@ public class LogBean {
                 workoutResults.add(sb.toString());
             }
         }
+    }
+
+    public String logOut() {
+        userId = "";
+        email = "";
+        password = "";
+        googleIdToken = "";
+        facebookAccessToken = "";
+
+        loginResult = "";
+        date = null;
+        output = null;
+        actualDayLog = null;
+        workoutResults = null;
+        return "loggedOut";
+    }
+
+    public String getGoogleIdToken() {
+        return googleIdToken;
+    }
+
+    public void setGoogleIdToken(String googleIdToken) {
+        this.googleIdToken = googleIdToken;
+    }
+
+    public String getFacebookAccessToken() {
+        return facebookAccessToken;
+    }
+
+    public void setFacebookAccessToken(String facebookAccessToken) {
+        this.facebookAccessToken = facebookAccessToken;
     }
 
 }
