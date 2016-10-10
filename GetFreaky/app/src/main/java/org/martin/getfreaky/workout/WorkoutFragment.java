@@ -47,8 +47,6 @@ public class WorkoutFragment extends Fragment {
     public static final int CONTEXT_ACTION_EDIT = 11;
     public static final int CONTEXT_ACTION_DO_WORKOUT = 12;
 
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
-
     private ListView listView;
     private WorkoutAdapter adapter;
     private FloatingActionButton fab;
@@ -89,34 +87,6 @@ public class WorkoutFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 showNewWorkoutDialog();
-            }
-        });
-
-        RetrofitClient client = new RetrofitClient();
-        GetFreakyService service = client.createService();
-        Call<List<Workout>> call = service.getWorkouts(user.getId());
-        call.enqueue(new Callback<List<Workout>>() {
-            @Override
-            public void onResponse(Call<List<Workout>> call, Response<List<Workout>> response) {
-                List<Workout> workouts = new ArrayList<Workout>();
-                user = realm.where(User.class)
-                        .equalTo("id", userId)
-                        .findFirst();
-                RealmList<Workout> workoutRealmResults = user.getWorkouts();
-                for (Workout workout : response.body()) {
-                    if (!adapter.contains(workout)) {
-                        adapter.addWorkout(workout);
-                        realm.beginTransaction();
-                        workoutRealmResults.add(workout);
-                        realm.commitTransaction();
-                    }
-                }
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onFailure(Call<List<Workout>> call, Throwable t) {
-                Toast.makeText(getContext(), "Could not connect to server", Toast.LENGTH_LONG).show();
             }
         });
 

@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.NONE, R.id.menu_settings, Menu.NONE, R.string.menu_settings);
+        menu.add(Menu.NONE, R.id.merge_accounts, Menu.NONE, R.string.menu_merge);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -60,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_settings:
                 Intent it = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(it);
+                return true;
+            case R.id.merge_accounts:
+                Intent intent = new Intent(MainActivity.this, MergeActivity.class);
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

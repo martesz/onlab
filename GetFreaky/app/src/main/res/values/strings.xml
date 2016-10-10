@@ -75,6 +75,7 @@
     </string>
     <string name="BASE_URL_KEY">base</string>
     <string name="menu_settings">Settings</string>
+    <string name="menu_merge">Merge accounts</string>
     <string name="workout_title">Add Workouts</string>
     <string name="create_workout">Create Workout</string>
     <string name="do_workout">Do workout</string>
@@ -109,4 +110,6 @@
     <string name="save">Save</string>
     <string name="google_server_client_id">184243885869-enlbqgos6p3t9fqujkh89squibv04ncu.apps.googleusercontent.com</string>
     <string name="facebook_app_id">767706113368797</string>
+    <string name="merge_accounts">Merge Accounts</string>
+    <string name="action_associate_email">Associate email and password</string>
 </resources>

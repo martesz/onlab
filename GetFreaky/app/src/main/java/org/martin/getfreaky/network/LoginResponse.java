@@ -1,5 +1,7 @@
 package org.martin.getfreaky.network;
 
+import org.martin.getfreaky.dataObjects.User;
+
 /**
  * Created by martin on 2016. 05. 15..
  */
@@ -11,6 +13,7 @@ public class LoginResponse {
 
     private ResponseMessage message;
     private String assignedUserId;
+    private User user;
 
     public LoginResponse(ResponseMessage message) {
         this.message = message;
@@ -21,11 +24,21 @@ public class LoginResponse {
         this.assignedUserId = assignedUserId;
     }
 
+    public LoginResponse(ResponseMessage message, String assignedUserId, User user) {
+        this.message = message;
+        this.assignedUserId = assignedUserId;
+        this.user = user;
+    }
+
     public ResponseMessage getMessage() {
         return message;
     }
 
     public String getAssignedUserId() {
         return assignedUserId;
+    }
+
+    public User getUser() {
+        return this.user;
     }
 }

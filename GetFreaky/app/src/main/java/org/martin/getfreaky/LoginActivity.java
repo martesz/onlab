@@ -45,6 +45,7 @@ import org.martin.getfreaky.network.GetFreakyService;
 import org.martin.getfreaky.network.LoginResponse;
 import org.martin.getfreaky.network.RetrofitClient;
 import org.martin.getfreaky.utils.Password;
+import org.martin.getfreaky.utils.Validator;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -194,7 +195,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (!TextUtils.isEmpty(password) && !Validator.isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
@@ -205,7 +206,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        } else if (!Validator.isEmailValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
@@ -222,16 +223,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
         }
-    }
-
-    private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
-    }
-
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
     }
 
     /**
@@ -275,6 +266,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     }
 
+    public void updateUser(User user, LoginResponse response) {
+
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -299,51 +294,59 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     .equalTo("email", mEmail)
                     .findFirst();
 
-            // If the user does not exist create it
-            if (user == null) {
-                User newUser = new User();
-                newUser.setEmail(mEmail);
-                newUser.setPassword(mPassword);
+            User userToSend = new User();
+            userToSend.setEmail(mEmail);
+            userToSend.setPassword(mPassword);
 
-                RetrofitClient client = new RetrofitClient();
-                GetFreakyService service = client.createService();
-                Call<LoginResponse> call = service.signInOrRegisterUser(newUser);
-                try {
-                    response = call.execute().body();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                if (response != null) {
-                    if (response.getMessage() == LoginResponse.ResponseMessage.USER_REGISTERED ||
-                            response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
-                        // Sent the password in plain text, because later I will use SSL and
-                        // it is better to hash on the server
+            RetrofitClient client = new RetrofitClient();
+            GetFreakyService service = client.createService();
+            Call<LoginResponse> call = service.signInOrRegisterUser(userToSend);
+            try {
+                response = call.execute().body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (response != null) {
+                if (response.getMessage() == LoginResponse.ResponseMessage.USER_REGISTERED ||
+                        response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
+                    // User not yet exists in our database, we have to store it
+                    if (user == null) {
                         String hashedPassword = Password.getHash(mPassword);
-                        newUser.setPassword(hashedPassword);
-                        storeUser(newUser, response, realm);
-                        return true;
+                        userToSend.setPassword(hashedPassword);
+                        storeUser(userToSend, response, realm);
                     } else {
-                        return false;
+                        // User already exists in our database, only update it
+                        user.update(response.getUser(), realm);
+                        createDaylog(user, realm);
+                        saveUserInPreferences(user.getId());
                     }
-                } else {
-                    response = new LoginResponse(LoginResponse.ResponseMessage.COULD_NOT_CONNECT);
-                    return false;
-                }
-            } else {
-                // If the user exists in the DB, do not need to check it on the server
-                // Check the password
-                if (Password.equals(mPassword, user.getPassword())) {
-                    createDaylog(user, realm);
-                    saveUserInPreferences(user.getId());
                     realm.close();
-                    response = new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
                     return true;
                 } else {
                     realm.close();
-                    response = new LoginResponse(LoginResponse.ResponseMessage.WRONG_PASSWORD);
+                    return false;
+                }
+            } else {
+                // If the user exists on local database, sign in offline
+                if (user != null) {
+                    // Check the password
+                    if (Password.equals(mPassword, user.getPassword())) {
+                        createDaylog(user, realm);
+                        saveUserInPreferences(user.getId());
+                        realm.close();
+                        response = new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
+                        return true;
+                    } else {
+                        response = new LoginResponse(LoginResponse.ResponseMessage.WRONG_PASSWORD);
+                        realm.close();
+                        return false;
+                    }
+                } else {
+                    realm.close();
                     return false;
                 }
             }
+
 
         }
 
@@ -435,7 +438,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     public class FacebookSignInTask extends AsyncTask<Void, Void, Boolean> {
 
         private LoginResult result;
-
         Realm realm;
 
         public FacebookSignInTask(LoginResult result) {

@@ -219,7 +219,7 @@ public class LogBean {
         date = null;
         output = null;
         actualDayLog = null;
-        workoutResults = null;
+        workoutResults.clear();
         return "loggedOut";
     }
 

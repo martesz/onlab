@@ -85,7 +85,7 @@ public class User {
         this.dayLogs = dayLogs;
     }
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.PERSIST)
     public List<Workout> getWorkouts() {
         return workouts;
     }

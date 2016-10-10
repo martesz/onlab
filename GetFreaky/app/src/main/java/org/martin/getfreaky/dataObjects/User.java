@@ -1,7 +1,11 @@
 package org.martin.getfreaky.dataObjects;
 
+import org.martin.getfreaky.utils.ListUtils;
+
+import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.RealmResults;
 import io.realm.annotations.PrimaryKey;
 
 /**
@@ -89,5 +93,23 @@ public class User extends RealmObject {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public void merge(User user, Realm realm) {
+        realm.beginTransaction();
+        this.workouts.addAll(user.getWorkouts());
+        user.deleteFromRealm();
+        realm.commitTransaction();
+    }
+
+    public void update(User user, Realm realm) {
+        realm.beginTransaction();
+        this.googleId = user.getGoogleId();
+        this.facebookId = user.getFacebookId();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        ListUtils.merge(this.getDayLogs(), user.getDayLogs());
+        ListUtils.merge(this.getWorkouts(), user.getWorkouts());
+        realm.commitTransaction();
     }
 }

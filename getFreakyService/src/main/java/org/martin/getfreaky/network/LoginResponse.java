@@ -6,14 +6,14 @@
 package org.martin.getfreaky.network;
 
 import java.io.Serializable;
+import org.martin.getfreaky.dataObjects.User;
 
 /**
  *
- * @author martin 
- * Using this instead of JAX-RS Response, because of the
+ * @author martin Using this instead of JAX-RS Response, because of the
  * compatibility with Android Retrofit
  */
-public class LoginResponse implements Serializable{
+public class LoginResponse implements Serializable {
 
     public enum ResponseMessage {
         USER_REGISTERED, USER_SIGNED_IN, WRONG_PASSWORD,
@@ -22,6 +22,7 @@ public class LoginResponse implements Serializable{
 
     private ResponseMessage message;
     private String assignedUserId;
+    private User user;
 
     public LoginResponse(ResponseMessage message) {
         this.message = message;
@@ -31,6 +32,12 @@ public class LoginResponse implements Serializable{
         this.message = message;
         this.assignedUserId = assignedUserId;
     }
+    
+    public LoginResponse(ResponseMessage message, String assignedUserId, User user) {
+        this.message = message;
+        this.assignedUserId = assignedUserId;
+        this.user = user;
+    }
 
     public ResponseMessage getMessage() {
         return message;
@@ -39,5 +46,8 @@ public class LoginResponse implements Serializable{
     public String getAssignedUserId() {
         return assignedUserId;
     }
-        
+
+    public User getUser() {
+        return this.user;
+    }
 }

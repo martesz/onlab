@@ -29,10 +29,12 @@ import org.martin.getfreaky.dataObjects.BodyLog;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.Measurements;
+import org.martin.getfreaky.dataObjects.MergeData;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.database.QueryBean;
+import org.martin.getfreaky.network.MergeResponse;
 import org.martin.getfreaky.utils.FacebookLogin;
 import org.martin.getfreaky.utils.GoogleSignIn;
 
@@ -52,7 +54,6 @@ public class GetFreaky {
         exercise = new Exercise("incline bench press");
         exercise.addSet(new WorkingSet(10, 10));
         exercise.addSet(new WorkingSet(9, 9));
-
     }
 
     @GET
@@ -173,6 +174,17 @@ public class GetFreaky {
         Gson gson = new Gson();
         User user = FacebookLogin.login(facebookAccessToken);
         LoginResponse response = queryBean.signInOrRegisterFacebook(user);
+        return gson.toJson(response);
+    }
+    
+    @PUT
+    @Path("mergeAccountsAndroid")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String mergeAccountsAndroid(String content) {
+        Gson gson = new Gson();
+        MergeData mergeData = gson.fromJson(content, MergeData.class);
+        MergeResponse response = queryBean.mergeAccounts(mergeData);
         return gson.toJson(response);
     }
 

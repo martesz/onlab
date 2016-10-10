@@ -2,6 +2,7 @@ package org.martin.getfreaky.network;
 
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
+import org.martin.getfreaky.dataObjects.MergeData;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.Workout;
 
@@ -32,6 +33,9 @@ public interface GetFreakyService {
 
     @PUT("signInOrRegisterFacebook")
     Call<LoginResponse> signInOrRegisterFacebook(@Body String facebookAccessToken);
+
+    @PUT("mergeAccountsAndroid")
+    Call<MergeResponse> mergeUsers(@Body MergeData data);
 
     @GET("{userId}/workouts")
     Call<List<Workout>> getWorkouts(@Path("userId") String userId);
