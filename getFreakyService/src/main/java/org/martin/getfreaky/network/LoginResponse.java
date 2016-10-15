@@ -6,6 +6,7 @@
 package org.martin.getfreaky.network;
 
 import java.io.Serializable;
+import org.martin.getfreaky.dataObjects.AccessToken;
 import org.martin.getfreaky.dataObjects.User;
 
 /**
@@ -23,6 +24,7 @@ public class LoginResponse implements Serializable {
     private ResponseMessage message;
     private String assignedUserId;
     private User user;
+    private AccessToken accessToken;
 
     public LoginResponse(ResponseMessage message) {
         this.message = message;
@@ -32,11 +34,26 @@ public class LoginResponse implements Serializable {
         this.message = message;
         this.assignedUserId = assignedUserId;
     }
-    
+
     public LoginResponse(ResponseMessage message, String assignedUserId, User user) {
         this.message = message;
         this.assignedUserId = assignedUserId;
         this.user = user;
+    }
+
+    public LoginResponse(ResponseMessage message, String assignedUserId, User user, AccessToken accessToken) {
+        this.message = message;
+        this.assignedUserId = assignedUserId;
+        this.user = user;
+        this.accessToken = accessToken;
+    }
+    
+    public AccessToken getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(AccessToken accessToken) {
+        this.accessToken = accessToken;
     }
 
     public ResponseMessage getMessage() {

@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.martin.getfreaky.GlobalVariables;
 import org.martin.getfreaky.LoginActivity;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.User;
@@ -212,7 +213,7 @@ public class WorkoutFragment extends Fragment {
         // Copy the workout, because Realm uses lazy loading
         // and It causes errors in asynchronous calls
         Workout copy = new Workout(workout);
-        RetrofitClient client = new RetrofitClient();
+        RetrofitClient client = new RetrofitClient((GlobalVariables) this.getActivity().getApplication());
         GetFreakyService service = client.createService();
         Call<WorkoutResponse> call = service.deleteWorkout(userId, copy.getId());
         call.enqueue(new Callback<WorkoutResponse>() {

@@ -11,6 +11,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.martin.getfreaky.GlobalVariables;
 import org.martin.getfreaky.LoginActivity;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.DayLog;
@@ -171,7 +172,7 @@ public class DoWorkoutActivity extends AppCompatActivity {
 
     private void putDayLog(DayLog dayLog) {
         DayLog copy = new DayLog(dayLog);
-        RetrofitClient client = new RetrofitClient();
+        RetrofitClient client = new RetrofitClient((GlobalVariables) this.getApplication());
         GetFreakyService service = client.createService();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(DoWorkoutActivity.this);
         String userId = preferences.getString(LoginActivity.USER_ID_KEY, "DefaultUser");

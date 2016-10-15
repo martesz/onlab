@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.martin.getfreaky.GlobalVariables;
 import org.martin.getfreaky.LoginActivity;
 import org.martin.getfreaky.MyPagerAdapter;
 import org.martin.getfreaky.R;
@@ -116,7 +117,7 @@ public class BodyLogFragment extends Fragment {
 
     private void putDayLog(DayLog dayLog) {
         DayLog copy = new DayLog(dayLog);
-        RetrofitClient client = new RetrofitClient();
+        RetrofitClient client = new RetrofitClient((GlobalVariables) this.getActivity().getApplication());
         GetFreakyService service = client.createService();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String userId = preferences.getString(LoginActivity.USER_ID_KEY, "DefaultUser");

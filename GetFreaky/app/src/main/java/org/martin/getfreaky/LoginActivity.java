@@ -82,6 +82,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private int RC_SIGN_IN = 101;
     private LoginButton loginButton;
     private CallbackManager callbackManager;
+    private GlobalVariables application;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +91,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         AppEventsLogger.activateApp(this);
         setContentView(R.layout.activity_login);
         callbackManager = CallbackManager.Factory.create();
+
+        application = (GlobalVariables) this.getApplication();
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -266,9 +269,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     }
 
-    public void updateUser(User user, LoginResponse response) {
-
-    }
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
@@ -298,7 +298,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             userToSend.setEmail(mEmail);
             userToSend.setPassword(mPassword);
 
-            RetrofitClient client = new RetrofitClient();
+            RetrofitClient client = new RetrofitClient(application);
             GetFreakyService service = client.createService();
             Call<LoginResponse> call = service.signInOrRegisterUser(userToSend);
             try {
@@ -311,14 +311,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
                     // User not yet exists in our database, we have to store it
                     if (user == null) {
-                        String hashedPassword = Password.getHash(mPassword);
-                        userToSend.setPassword(hashedPassword);
-                        storeUser(userToSend, response, realm);
+                        storeUser(response, realm);
                     } else {
                         // User already exists in our database, only update it
-                        user.update(response.getUser(), realm);
-                        createDaylog(user, realm);
-                        saveUserInPreferences(user.getId());
+                        updateUser(user, response, realm);
                     }
                     realm.close();
                     return true;
@@ -334,7 +330,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         createDaylog(user, realm);
                         saveUserInPreferences(user.getId());
                         realm.close();
-                        response = new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
+                        response = new LoginResponse(LoginResponse.ResponseMessage.SIGNED_IN_OFFLINE);
                         return true;
                     } else {
                         response = new LoginResponse(LoginResponse.ResponseMessage.WRONG_PASSWORD);
@@ -384,41 +380,45 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     .equalTo("googleId", acct.getId())
                     .findFirst();
 
-            // If the user does not exist create it
-            if (user == null) {
-                user = new User();
-                user.setGoogleId(acct.getId());
-                user.setName(acct.getDisplayName());
+            RetrofitClient client = new RetrofitClient(application);
+            GetFreakyService service = client.createService();
+            Call<LoginResponse> call = service.signInOrRegisterGoogle(acct.getIdToken());
+            try {
+                response = call.execute().body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-                RetrofitClient client = new RetrofitClient();
-                GetFreakyService service = client.createService();
-                Call<LoginResponse> call = service.signInOrRegisterGoogle(acct.getIdToken());
-                try {
-                    response = call.execute().body();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                if (response != null) {
-                    if (response.getMessage() == LoginResponse.ResponseMessage.USER_REGISTERED ||
-                            response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
-                        storeUser(user, response, realm);
-                        return true;
+            if (response != null) {
+                if (response.getMessage() == LoginResponse.ResponseMessage.USER_REGISTERED ||
+                        response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
+                    if (user == null) {
+                        storeUser(response, realm);
                     } else {
-                        return false;
+                        // User already exists in our database, only update it
+                        updateUser(user, response, realm);
                     }
+                    realm.close();
+                    return true;
+                } else {
+                    realm.close();
+                    return false;
+                }
+            } else {
+                if (user != null) {
+                    createDaylog(user, realm);
+                    saveUserInPreferences(user.getId());
+                    realm.close();
+                    response = new LoginResponse(LoginResponse.ResponseMessage.SIGNED_IN_OFFLINE);
+                    return true;
                 } else {
                     response = new LoginResponse(LoginResponse.ResponseMessage.COULD_NOT_CONNECT);
                     return false;
                 }
-            } else {
-                createDaylog(user, realm);
-                saveUserInPreferences(user.getId());
-                realm.close();
-                response = new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
-                return true;
             }
 
         }
+
 
         @Override
         protected void onPostExecute(final Boolean success) {
@@ -454,37 +454,34 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             User user = realm.where(User.class)
                     .equalTo("facebookId", facebookUserId)
                     .findFirst();
-
-            // If the user does not exist create it
-            if (user == null) {
-                user = new User();
-                user.setFacebookId(facebookUserId);
-
-                RetrofitClient client = new RetrofitClient();
-                GetFreakyService service = client.createService();
-                Call<LoginResponse> call = service.signInOrRegisterFacebook(token);
-                try {
-                    response = call.execute().body();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                if (response != null) {
-                    if (response.getMessage() == LoginResponse.ResponseMessage.USER_REGISTERED ||
-                            response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
-                        storeUser(user, response, realm);
-                        return true;
+            RetrofitClient client = new RetrofitClient(application);
+            GetFreakyService service = client.createService();
+            Call<LoginResponse> call = service.signInOrRegisterFacebook(token);
+            try {
+                response = call.execute().body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (response != null) {
+                if (response.getMessage() == LoginResponse.ResponseMessage.USER_REGISTERED ||
+                        response.getMessage() == LoginResponse.ResponseMessage.USER_SIGNED_IN) {
+                    // If the user does not exist create it
+                    if (user == null) {
+                        storeUser(response, realm);
                     } else {
-                        return false;
+                        updateUser(user, response, realm);
                     }
+                    realm.close();
+                    return true;
                 } else {
-                    response = new LoginResponse(LoginResponse.ResponseMessage.COULD_NOT_CONNECT);
+                    realm.close();
                     return false;
                 }
             } else {
                 createDaylog(user, realm);
                 saveUserInPreferences(user.getId());
+                response = new LoginResponse(LoginResponse.ResponseMessage.SIGNED_IN_OFFLINE);
                 realm.close();
-                response = new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN);
                 return true;
             }
 
@@ -505,9 +502,16 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
+    private void updateUser(User user, LoginResponse response, Realm realm) {
+        storeAccessToken(response);
+        user.update(response.getUser(), realm);
+        createDaylog(user, realm);
+        saveUserInPreferences(user.getId());
+    }
 
-    private void storeUser(User user, LoginResponse response, Realm realm) {
-        user.setId(response.getAssignedUserId());
+    private void storeUser(LoginResponse response, Realm realm) {
+        storeAccessToken(response);
+        User user = response.getUser();
         createDaylog(user, realm);
         realm.beginTransaction();
         realm.copyToRealm(user);
@@ -538,10 +542,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         preferences.edit().putString(USER_ID_KEY, userId).apply();
     }
 
+    private void storeAccessToken(LoginResponse response) {
+        ((GlobalVariables) this.getApplication()).setCurrentToken(response.getAccessToken());
+    }
+
     private void createDaylog(User user, BaseRealm realm) {
         RealmList<DayLog> dayLogs = user.getDayLogs();
 
-        RetrofitClient client = new RetrofitClient();
+        RetrofitClient client = new RetrofitClient((GlobalVariables) this.getApplication());
         GetFreakyService service = client.createService();
         Call<List<DayLog>> call = service.getDayLogs(user.getId());
 

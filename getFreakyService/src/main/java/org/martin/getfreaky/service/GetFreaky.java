@@ -35,6 +35,7 @@ import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.database.QueryBean;
 import org.martin.getfreaky.network.MergeResponse;
+import org.martin.getfreaky.network.Secured;
 import org.martin.getfreaky.utils.FacebookLogin;
 import org.martin.getfreaky.utils.GoogleSignIn;
 
@@ -178,6 +179,7 @@ public class GetFreaky {
     }
     
     @PUT
+    @Secured
     @Path("mergeAccountsAndroid")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -194,6 +196,7 @@ public class GetFreaky {
      * @return The user's workouts
      */
     @GET
+    @Secured
     @Path("{userId}/workouts")
     @Produces(MediaType.APPLICATION_JSON)
     public String getWorkouts(@PathParam("userId") String userId) {
@@ -203,6 +206,7 @@ public class GetFreaky {
     }
 
     @PUT
+    @Secured
     @Path("{userId}/workouts")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -214,6 +218,7 @@ public class GetFreaky {
     }
 
     @DELETE
+    @Secured
     @Path("{userId}/workouts/{workoutId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -224,6 +229,7 @@ public class GetFreaky {
     }
 
     @GET
+    @Secured
     @Path("{userId}/dayLogs")
     @Produces(MediaType.APPLICATION_JSON)
     public String getDayLogs(@PathParam("userId") String userId) {
@@ -239,6 +245,7 @@ public class GetFreaky {
      * @return The DayLog adherent to the user and the date
      */
     @GET
+    @Secured
     @Path("{userId}/dayLogs/{date}")
     @Produces(MediaType.APPLICATION_JSON)
     public String getDayLog(@PathParam("userId") String userId,
@@ -250,6 +257,7 @@ public class GetFreaky {
     }
 
     @PUT
+    @Secured
     @Path("{userId}/dayLogs")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

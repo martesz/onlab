@@ -17,6 +17,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.martin.getfreaky.dataObjects.AccessToken;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.User;
@@ -35,13 +36,14 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class LogBean {
 
-    public static final String BASE_URL = "http://localhost:10516/getFreakyService/getFreakyService/";
+    public static final String BASE_URL = "http://localhost:20285/getFreakyService/getFreakyService/";
 
     private String userId;
     private String email;
     private String password;
     private String googleIdToken;
     private String facebookAccessToken;
+    private AccessToken accessToken;
 
     private String loginResult;
 
@@ -122,6 +124,7 @@ public class LogBean {
         if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
                 || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
             userId = lr.getAssignedUserId();
+            accessToken = lr.getAccessToken();
             return "loginSuccessful";
         } else {
             // Login not succesful
@@ -143,6 +146,7 @@ public class LogBean {
         if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
                 || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
             userId = lr.getAssignedUserId();
+            accessToken = lr.getAccessToken();
             return "loginSuccessful";
         } else {
             // Login not succesful
@@ -164,6 +168,7 @@ public class LogBean {
         if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
                 || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
             userId = lr.getAssignedUserId();
+            accessToken = lr.getAccessToken();
             return "loginSuccessful";
         } else {
             // Login not succesful
@@ -175,7 +180,7 @@ public class LogBean {
     /**
      * When the user selects a date, display the DayLog adherent to that day
      */
-    public void dateSelected(SelectEvent event) {
+    public void dateSelected(SelectEvent event) throws AccessToken.TokenExpiredException {
 
         date = (Date) event.getObject();
         SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
@@ -186,6 +191,7 @@ public class LogBean {
         Response response = client.target(BASE_URL)
                 .path(path)
                 .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", accessToken.getToken())
                 .get();
         String responseEntity = response.readEntity(String.class);
         actualDayLog = gson.fromJson(responseEntity, DayLog.class);
@@ -214,6 +220,7 @@ public class LogBean {
         password = "";
         googleIdToken = "";
         facebookAccessToken = "";
+        accessToken = null;
 
         loginResult = "";
         date = null;

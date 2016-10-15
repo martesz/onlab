@@ -67,6 +67,7 @@ public class MergeActivity extends AppCompatActivity implements GoogleApiClient.
     private LoginButton loginButton;
     private CallbackManager callbackManager;
     private String userId;
+    private GlobalVariables application = (GlobalVariables) this.getApplication();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -278,7 +279,7 @@ public class MergeActivity extends AppCompatActivity implements GoogleApiClient.
             data.setUserId(userId);
             data.setEmail(mEmail);
             data.setPassword(mPassword);
-            RetrofitClient client = new RetrofitClient();
+            RetrofitClient client = new RetrofitClient(application);
             GetFreakyService service = client.createService();
             Call<MergeResponse> call = service.mergeUsers(data);
             try {
@@ -342,7 +343,7 @@ public class MergeActivity extends AppCompatActivity implements GoogleApiClient.
             MergeData data = new MergeData();
             data.setUserId(userId);
             data.setFacebookAccessToken(token);
-            RetrofitClient client = new RetrofitClient();
+            RetrofitClient client = new RetrofitClient(application);
             GetFreakyService service = client.createService();
             Call<MergeResponse> call = service.mergeUsers(data);
 
@@ -404,7 +405,7 @@ public class MergeActivity extends AppCompatActivity implements GoogleApiClient.
             MergeData data = new MergeData();
             data.setUserId(userId);
             data.setGoogleIdToken(acct.getIdToken());
-            RetrofitClient client = new RetrofitClient();
+            RetrofitClient client = new RetrofitClient(application);
             GetFreakyService service = client.createService();
             Call<MergeResponse> call = service.mergeUsers(data);
             try {

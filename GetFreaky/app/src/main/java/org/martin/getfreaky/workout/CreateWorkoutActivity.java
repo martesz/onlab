@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.martin.getfreaky.GlobalVariables;
 import org.martin.getfreaky.LoginActivity;
 import org.martin.getfreaky.MainActivity;
 import org.martin.getfreaky.R;
@@ -227,7 +228,7 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
 
     private void putWorkout(Workout workout) {
         Workout copy = new Workout(workout);
-        RetrofitClient client = new RetrofitClient();
+        RetrofitClient client = new RetrofitClient((GlobalVariables) this.getApplication());
         GetFreakyService service = client.createService();
         Call<WorkoutResponse> call = service.putWorkout(copy, userId);
         call.enqueue(new Callback<WorkoutResponse>() {

@@ -1,5 +1,6 @@
 package org.martin.getfreaky.network;
 
+import org.martin.getfreaky.dataObjects.AccessToken;
 import org.martin.getfreaky.dataObjects.User;
 
 /**
@@ -8,12 +9,14 @@ import org.martin.getfreaky.dataObjects.User;
 public class LoginResponse {
     public enum ResponseMessage {
         USER_REGISTERED, USER_SIGNED_IN, WRONG_PASSWORD,
-        EMAIL_NULL, COULD_NOT_CONNECT, WRONG_GOOGLE_ID_TOKEN, WRONG_FACEBOOK_ACCESS_TOKEN
+        EMAIL_NULL, COULD_NOT_CONNECT, WRONG_GOOGLE_ID_TOKEN, WRONG_FACEBOOK_ACCESS_TOKEN,
+        SIGNED_IN_OFFLINE
     }
 
     private ResponseMessage message;
     private String assignedUserId;
     private User user;
+    private AccessToken accessToken;
 
     public LoginResponse(ResponseMessage message) {
         this.message = message;
@@ -28,6 +31,14 @@ public class LoginResponse {
         this.message = message;
         this.assignedUserId = assignedUserId;
         this.user = user;
+    }
+
+    public AccessToken getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(AccessToken accessToken) {
+        this.accessToken = accessToken;
     }
 
     public ResponseMessage getMessage() {
