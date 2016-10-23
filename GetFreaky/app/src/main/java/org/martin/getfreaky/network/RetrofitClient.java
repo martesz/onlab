@@ -2,7 +2,6 @@ package org.martin.getfreaky.network;
 
 
 import org.martin.getfreaky.GlobalVariables;
-import org.martin.getfreaky.dataObjects.AccessToken;
 
 import java.io.IOException;
 
@@ -28,15 +27,11 @@ public class RetrofitClient {
         clientBuilder.addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
-                AccessToken accessToken = application.getCurrentToken();
-                String token = "Not yet obtained";
-                if (accessToken != null) {
-                    try {
-                        token = accessToken.getToken();
-                    } catch (AccessToken.TokenExpiredException ex) {
-                        token = "expired";
-                    }
+                String token = application.getCurrentToken();
+                if(token == null) {
+                    token = "not yet obtained";
                 }
+
                 Request original = chain.request();
                 Request request = original.newBuilder()
                         .header("Authorization", token)

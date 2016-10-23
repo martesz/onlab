@@ -9,13 +9,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.ejb.Asynchronous;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import org.martin.getfreaky.dataObjects.AccessToken;
 import org.martin.getfreaky.network.DayLogResponse;
 import org.martin.getfreaky.network.LoginResponse;
 import org.martin.getfreaky.network.WorkoutResponse;
@@ -28,6 +26,7 @@ import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.network.MergeResponse;
 import org.martin.getfreaky.utils.FacebookLogin;
 import org.martin.getfreaky.utils.GoogleSignIn;
+import org.martin.getfreaky.utils.JWTService;
 import org.martin.getfreaky.utils.Password;
 
 @Stateless
@@ -35,6 +34,9 @@ public class QueryBean {
 
     @PersistenceContext(unitName = "getfreaky")
     private EntityManager em;
+
+    @EJB
+    JWTService jWTService;
 
     public QueryBean() {
 
@@ -62,7 +64,7 @@ public class QueryBean {
 
             if (Password.equals(user.getPassword(), existingUser.getPassword())) {
                 return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN,
-                        existingUser.getId(), existingUser, issueToken());
+                        existingUser.getId(), existingUser, jWTService.issueToken(existingUser.getId()));
             } else {
                 return new LoginResponse(LoginResponse.ResponseMessage.WRONG_PASSWORD);
             }
@@ -71,7 +73,7 @@ public class QueryBean {
             user.setPassword(Password.getHash(user.getPassword()));
             em.persist(user);
             return new LoginResponse(LoginResponse.ResponseMessage.USER_REGISTERED,
-                    userId, user, issueToken());
+                    userId, user, jWTService.issueToken(user.getId()));
         }
     }
 
@@ -82,12 +84,12 @@ public class QueryBean {
                         .setParameter("googleId", user.getGoogleId())
                         .getSingleResult();
                 return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN,
-                        existingUser.getId(), existingUser, issueToken());
+                        existingUser.getId(), existingUser, jWTService.issueToken(existingUser.getId()));
             } catch (NoResultException nre) {
                 user.generateUniqueId();
                 em.persist(user);
                 return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN,
-                        user.getId(), user, issueToken());
+                        user.getId(), user, jWTService.issueToken(user.getId()));
             }
         } else {
             return new LoginResponse(LoginResponse.ResponseMessage.WRONG_GOOGLE_ID_TOKEN);
@@ -101,12 +103,12 @@ public class QueryBean {
                         .setParameter("facebookId", user.getFacebookId())
                         .getSingleResult();
                 return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN,
-                        existingUser.getId(), existingUser, issueToken());
+                        existingUser.getId(), existingUser, jWTService.issueToken(existingUser.getId()));
             } catch (NoResultException nre) {
                 user.generateUniqueId();
                 em.persist(user);
                 return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN,
-                        user.getId(), user, issueToken());
+                        user.getId(), user, jWTService.issueToken(user.getId()));
             }
         } else {
             return new LoginResponse(LoginResponse.ResponseMessage.WRONG_FACEBOOK_ACCESS_TOKEN);
@@ -340,36 +342,4 @@ public class QueryBean {
         }
     }
 
-    /**
-     *
-     * @return New token that is persisted in the database
-     */
-    public AccessToken issueToken() {
-        AccessToken accessToken = new AccessToken();
-        em.persist(accessToken);
-        checkAccessTokens();
-        return accessToken;
-    }
-
-    public boolean isValid(String token) {
-        AccessToken accessToken = em.find(AccessToken.class, token);
-        if (accessToken != null && !accessToken.isExpired()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Checks all access tokens, and remove the expired ones
-     */
-    public void checkAccessTokens() {
-        Query query = em.createQuery("SELECT a from AccessToken a");
-        List<AccessToken> resultList = query.getResultList();
-        for (AccessToken accessToken : resultList) {
-            if (accessToken.getExpiryTime() < System.currentTimeMillis()) {
-                em.remove(accessToken);
-            }
-        }
-    }
 }

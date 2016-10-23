@@ -5,6 +5,7 @@
  */
 package org.martin.getfreaky.network;
 
+import io.jsonwebtoken.SignatureException;
 import java.io.IOException;
 import javax.annotation.Priority;
 import javax.ejb.EJB;
@@ -15,7 +16,7 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-import org.martin.getfreaky.database.QueryBean;
+import org.martin.getfreaky.utils.JWTService;
 
 /**
  *
@@ -23,8 +24,8 @@ import org.martin.getfreaky.database.QueryBean;
  *
  * Filters all requests coming to the REST end points annotated with @Secured If
  * any problems happen during the token validation, a response with status 401
- * UNAUTHORIZED will be returned.
- * Otherwise, the request will proceed to an endpoint.
+ * UNAUTHORIZED will be returned. Otherwise, the request will proceed to an
+ * endpoint.
  */
 @Secured
 @Provider
@@ -32,7 +33,7 @@ import org.martin.getfreaky.database.QueryBean;
 public class AuthenticationFilter implements ContainerRequestFilter {
 
     @EJB
-    QueryBean queryBean;
+    JWTService jWTService;
 
     @Override
     public void filter(ContainerRequestContext crc) throws IOException {
@@ -41,9 +42,12 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             throw new NotAuthorizedException("Authorization header must be provided");
         }
 
-        if (!queryBean.isValid(authorizationHeader)) {
+        try {
+            String userId = jWTService.validate(authorizationHeader);
+        } catch (SignatureException e) {
             crc.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
         }
+
     }
 
 }

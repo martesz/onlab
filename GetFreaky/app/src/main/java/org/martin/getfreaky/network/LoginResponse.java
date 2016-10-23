@@ -1,6 +1,5 @@
 package org.martin.getfreaky.network;
 
-import org.martin.getfreaky.dataObjects.AccessToken;
 import org.martin.getfreaky.dataObjects.User;
 
 /**
@@ -16,7 +15,7 @@ public class LoginResponse {
     private ResponseMessage message;
     private String assignedUserId;
     private User user;
-    private AccessToken accessToken;
+    private String accessToken;
 
     public LoginResponse(ResponseMessage message) {
         this.message = message;
@@ -33,11 +32,11 @@ public class LoginResponse {
         this.user = user;
     }
 
-    public AccessToken getAccessToken() {
+    public String getAccessToken() {
         return accessToken;
     }
 
-    public void setAccessToken(AccessToken accessToken) {
+    public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
 

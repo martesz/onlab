@@ -17,7 +17,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.martin.getfreaky.dataObjects.AccessToken;
 import org.martin.getfreaky.dataObjects.DayLog;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.User;
@@ -43,7 +42,7 @@ public class LogBean {
     private String password;
     private String googleIdToken;
     private String facebookAccessToken;
-    private AccessToken accessToken;
+    private String accessToken;
 
     private String loginResult;
 
@@ -180,7 +179,7 @@ public class LogBean {
     /**
      * When the user selects a date, display the DayLog adherent to that day
      */
-    public void dateSelected(SelectEvent event) throws AccessToken.TokenExpiredException {
+    public void dateSelected(SelectEvent event) {
 
         date = (Date) event.getObject();
         SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
@@ -191,7 +190,7 @@ public class LogBean {
         Response response = client.target(BASE_URL)
                 .path(path)
                 .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken.getToken())
+                .header("Authorization", accessToken)
                 .get();
         String responseEntity = response.readEntity(String.class);
         actualDayLog = gson.fromJson(responseEntity, DayLog.class);
@@ -220,7 +219,7 @@ public class LogBean {
         password = "";
         googleIdToken = "";
         facebookAccessToken = "";
-        accessToken = null;
+        accessToken = "";
 
         loginResult = "";
         date = null;
