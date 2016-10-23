@@ -15,13 +15,16 @@ import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import org.martin.getfreaky.network.DayLogResponse;
 import org.martin.getfreaky.network.LoginResponse;
 import org.martin.getfreaky.network.WorkoutResponse;
@@ -48,6 +51,9 @@ public class GetFreaky {
 
     @EJB
     QueryBean queryBean;
+
+    @Context
+    SecurityContext securityContext;
 
     Exercise exercise;
 
@@ -177,7 +183,7 @@ public class GetFreaky {
         LoginResponse response = queryBean.signInOrRegisterFacebook(user);
         return gson.toJson(response);
     }
-    
+
     @PUT
     @Secured
     @Path("mergeAccountsAndroid")
@@ -200,9 +206,13 @@ public class GetFreaky {
     @Path("{userId}/workouts")
     @Produces(MediaType.APPLICATION_JSON)
     public String getWorkouts(@PathParam("userId") String userId) {
-        List<Workout> workouts = queryBean.getWorkouts(userId);
-        Gson gson = new Gson();
-        return gson.toJson(workouts);
+        if (userId.equals(securityContext.getUserPrincipal().getName())) {
+            List<Workout> workouts = queryBean.getWorkouts(userId);
+            Gson gson = new Gson();
+            return gson.toJson(workouts);
+        } else {
+            throw new NotAuthorizedException("Wrong user");
+        }
     }
 
     @PUT
