@@ -151,6 +151,7 @@ public class MergeActivity extends AppCompatActivity implements GoogleApiClient.
 
             }
         });
+        application = (GlobalVariables) this.getApplication();
     }
 
     private void attemptLogin() {

@@ -1,61 +1,39 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.martin.getfreaky.database;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import org.martin.getfreaky.network.DayLogResponse;
-import org.martin.getfreaky.network.LoginResponse;
-import org.martin.getfreaky.network.WorkoutResponse;
-import org.martin.getfreaky.dataObjects.DayLog;
-import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.MergeData;
 import org.martin.getfreaky.dataObjects.User;
-import org.martin.getfreaky.dataObjects.WorkingSet;
-import org.martin.getfreaky.dataObjects.Workout;
+import org.martin.getfreaky.network.LoginResponse;
 import org.martin.getfreaky.network.MergeResponse;
 import org.martin.getfreaky.utils.FacebookLogin;
 import org.martin.getfreaky.utils.GoogleSignIn;
 import org.martin.getfreaky.utils.JWTService;
 import org.martin.getfreaky.utils.Password;
 
+/**
+ *
+ * @author martin
+ *
+ * Provides user registration and login services on the database level.
+ */
 @Stateless
-public class QueryBean {
+public class AuthenticationDao {
 
     @PersistenceContext(unitName = "getfreaky")
     private EntityManager em;
 
     @EJB
     JWTService jWTService;
-
-    public QueryBean() {
-
-    }
-
-    public void saveWorkingSet(WorkingSet workingSet) {
-        em.persist(workingSet);
-
-    }
-
-    public void saveExercise(Exercise ex) {
-        em.persist(ex);
-    }
-
-    public void saveDayLog(DayLog dl) {
-        em.persist(dl);
-    }
-
-    // If the user exists and the password is wrong returns false, else returns true
+    
+    /**
+     * 
+     * @param user The user to be logged in, or registered
+     * @return The result of the login or registration
+     */
     public LoginResponse signInOrRegisterUser(User user) {
         try {
             User existingUser = (User) em.createQuery("SELECT u from User u where u.email = :email")
@@ -76,7 +54,12 @@ public class QueryBean {
                     userId, user, jWTService.issueToken(user.getId()));
         }
     }
-
+    
+    /**
+     * 
+     * @param user The user to be logged in, or registered
+     * @return The result of the login or registration
+     */
     public LoginResponse signInOrRegisterGoogle(User user) {
         if (user != null) {
             try {
@@ -96,6 +79,11 @@ public class QueryBean {
         }
     }
 
+    /**
+     * 
+     * @param user The user to be logged in, or registered
+     * @return The result of the login or registration
+     */
     public LoginResponse signInOrRegisterFacebook(User user) {
         if (user != null) {
             try {
@@ -114,8 +102,13 @@ public class QueryBean {
             return new LoginResponse(LoginResponse.ResponseMessage.WRONG_FACEBOOK_ACCESS_TOKEN);
         }
     }
-
-    public MergeResponse mergeAccounts(MergeData mergeData) {
+    
+    /**
+     * 
+     * @param mergeData The data to be merged into the user's account
+     * @return The result of the merge
+     */
+     public MergeResponse mergeAccounts(MergeData mergeData) {
         User user = em.find(User.class, mergeData.getUserId());
         if (user != null) {
             if (mergeData.getEmail() != null) {
@@ -141,6 +134,13 @@ public class QueryBean {
         return new MergeResponse(MergeResponse.Message.MERGE_NOT_SUCCESSFUL);
     }
 
+     /**
+      * 
+      * @param user The user that need the new email
+      * @param email The email to be set
+      * @param password The password to be set
+      * @return The result of the association
+      */
     private boolean associateEmail(User user, String email, String password) {
         try {
             User existingUser = (User) em.createQuery("SELECT u from User u where u.email = :email")
@@ -165,6 +165,12 @@ public class QueryBean {
         }
     }
 
+    /**
+     * 
+     * @param user The user that gets the google id token
+     * @param googleIdToken
+     * @return The result of the association
+     */
     private boolean associateGoogle(User user, String googleIdToken) {
         User googleUser = GoogleSignIn.authenticateAndroid(googleIdToken);
         try {
@@ -185,6 +191,12 @@ public class QueryBean {
         }
     }
 
+    /**
+     * 
+     * @param user The user that gets the facebook access token
+     * @param facebookAccessToken
+     * @return The result of the association
+     */
     private boolean associateFacebook(User user, String facebookAccessToken) {
         User fUser = FacebookLogin.login(facebookAccessToken);
         try {
@@ -208,138 +220,6 @@ public class QueryBean {
     private void mergeUsers(User a, User b) {
         a.getWorkouts().addAll(b.getWorkouts());
         em.remove(b);
-    }
-
-    public List<Exercise> getAllExercises() {
-        List<Exercise> result = em.createNamedQuery("findAllExercises").getResultList();
-        return result;
-    }
-
-    public List<DayLog> getAllDaylogs() {
-        List<DayLog> result = em.createNamedQuery("findAllDayLogs").getResultList();
-        return result;
-    }
-
-    public Exercise getExercise(String id) {
-        return em.find(Exercise.class, id);
-    }
-
-    public WorkingSet getWorkingSet(long id) {
-        return em.find(WorkingSet.class, id);
-    }
-
-    public List<Workout> getWorkouts(String userId) {
-        User user = em.find(User.class, userId);
-        if (user != null) {
-            return user.getWorkouts();
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    public WorkoutResponse insertOrUpdateWorkout(Workout workout, String userId) {
-        Workout existing = em.find(Workout.class, workout.getId());
-        if (existing == null) {
-            User user = em.find(User.class, userId);
-            user.getWorkouts().add(workout);
-            return new WorkoutResponse(WorkoutResponse.ResponseMessage.WORKOUT_UPLOADED);
-        } else {
-            existing.setName(workout.getName());
-            Iterator<Exercise> it = existing.getExercises().iterator();
-            merge(existing.getExercises(), workout.getExercises());
-
-            return new WorkoutResponse(WorkoutResponse.ResponseMessage.WORKOUT_UPDATED);
-        }
-    }
-
-    public List<DayLog> getDayLogs(String userId) {
-        User user = em.find(User.class, userId);
-        if (user != null) {
-            return user.getDayLogs();
-        } else {
-            return new ArrayList<>();
-        }
-    }
-
-    public DayLogResponse insertOrUpdateDayLog(DayLog dayLog, String userId) {
-        DayLog existing = em.find(DayLog.class, dayLog.getDayLogId());
-        if (existing == null) {
-            User user = em.find(User.class, userId);
-            if (user != null) {
-                user.getDayLogs().add(dayLog);
-                return new DayLogResponse(DayLogResponse.ResponseMessage.DAYLOG_UPLOADED);
-            } else {
-                return new DayLogResponse(DayLogResponse.ResponseMessage.SOMETHING_WENT_WRONG);
-            }
-        } else {
-            existing.setDate(dayLog.getDate());
-            merge(existing.getProgressPictures(), dayLog.getProgressPictures());
-            merge(existing.getWorkoutResults(), dayLog.getWorkoutResults());
-            existing.updateBodyLog(dayLog.getBodylog());
-            return new DayLogResponse(DayLogResponse.ResponseMessage.DAYLOG_UPDATED);
-        }
-    }
-
-    public <T> void merge(List<T> existing, List<T> uploaded) {
-        Iterator<T> it = existing.iterator();
-        while (it.hasNext()) {
-            if (!uploaded.contains(it.next())) {
-                it.remove();
-            }
-        }
-        for (T t : uploaded) {
-            if (!existing.contains(t)) {
-                existing.add(t);
-            }
-        }
-    }
-
-    /**
-     *
-     * @param workoutId
-     * @param userId
-     * @return The result of the deletion
-     */
-    public WorkoutResponse deleteWorkout(String workoutId, String userId) {
-        User user = em.find(User.class, userId);
-        if (user == null) {
-            return new WorkoutResponse(WorkoutResponse.ResponseMessage.SOMETHING_WENT_WRONG);
-        } else {
-            Iterator<Workout> it = user.getWorkouts().iterator();
-            while (it.hasNext()) {
-                Workout workout = it.next();
-                if (workout.getId().equals(workoutId)) {
-                    it.remove();
-                    em.remove(workout);
-                    return new WorkoutResponse(WorkoutResponse.ResponseMessage.WORKOUT_DELETED);
-                }
-            }
-
-        }
-        return new WorkoutResponse(WorkoutResponse.ResponseMessage.SOMETHING_WENT_WRONG);
-    }
-
-    /**
-     *
-     * @param userId User email
-     * @param date DayLog date
-     * @return If there is a DayLog of that date and user return it, if there is
-     * not match return empty DayLog
-     */
-    public DayLog getDayLog(String userId, String date) {
-        User user = em.find(User.class, userId);
-        if (user != null) {
-            SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
-            for (DayLog dl : user.getDayLogs()) {
-                String actDate = fmt.format(dl.getDate());
-                if (date.equals(actDate)) {
-                    return dl;
-                }
-            }
-            return new DayLog();
-        } else {
-            return new DayLog();
-        }
     }
 
 }

@@ -25,30 +25,30 @@ public interface GetFreakyService {
     @GET("getFreakyService")
     Call<Exercise> getExercise();
 
-    @PUT("signInOrRegisterEmail")
+    @PUT("authentication/signInOrRegisterEmail")
     Call<LoginResponse> signInOrRegisterUser(@Body User user);
 
-    @PUT("signInOrRegisterGoogleAndroid")
+    @PUT("authentication/signInOrRegisterGoogleAndroid")
     Call<LoginResponse> signInOrRegisterGoogle(@Body String googleIdToken);
 
-    @PUT("signInOrRegisterFacebook")
+    @PUT("authentication/signInOrRegisterFacebook")
     Call<LoginResponse> signInOrRegisterFacebook(@Body String facebookAccessToken);
 
-    @PUT("mergeAccountsAndroid")
+    @PUT("authentication/mergeAccountsAndroid")
     Call<MergeResponse> mergeUsers(@Body MergeData data);
 
-    @GET("{userId}/workouts")
+    @GET("workout/{userId}/workouts")
     Call<List<Workout>> getWorkouts(@Path("userId") String userId);
 
-    @PUT("{userId}/workouts")
+    @PUT("workout/{userId}/workouts")
     Call<WorkoutResponse> putWorkout(@Body Workout workout, @Path("userId") String userId);
 
-    @DELETE("{userId}/workouts/{workoutId}")
+    @DELETE("workout/{userId}/workouts/{workoutId}")
     Call<WorkoutResponse> deleteWorkout(@Path("userId") String userId, @Path("workoutId") String workoutId);
 
-    @GET("{userId}/dayLogs")
+    @GET("dayLog/{userId}/dayLogs")
     Call<List<DayLog>> getDayLogs(@Path("userId") String userId);
 
-    @PUT("{userId}/dayLogs")
+    @PUT("dayLog/{userId}/dayLogs")
     Call<DayLogResponse> putDayLog(@Body DayLog dayLog, @Path("userId") String userId);
 }

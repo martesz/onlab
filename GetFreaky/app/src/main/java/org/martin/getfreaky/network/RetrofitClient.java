@@ -27,7 +27,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  */
 public class RetrofitClient {
 
-    public static String BASE_URL = "https://192.168.1.2:20286/getFreakyService/getFreakyService/";
+    public static String BASE_URL = "https://192.168.1.2:20286/getFreakyService/";
 
     private Retrofit retrofit;
 
@@ -77,6 +77,7 @@ public class RetrofitClient {
         return retrofit.create(GetFreakyService.class);
     }
 
+    // The returned SSLSocketFactory does not care about certificates
     public SSLSocketFactory getUnsafeSocketFactory() throws KeyManagementException, NoSuchAlgorithmException {
         TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
             @Override

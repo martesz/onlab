@@ -36,7 +36,7 @@ import org.martin.getfreaky.dataObjects.MergeData;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
-import org.martin.getfreaky.database.QueryBean;
+import org.martin.getfreaky.database.TestDao;
 import org.martin.getfreaky.network.MergeResponse;
 import org.martin.getfreaky.network.Secured;
 import org.martin.getfreaky.utils.FacebookLogin;
@@ -47,17 +47,17 @@ import org.martin.getfreaky.utils.GoogleSignIn;
  */
 @RequestScoped
 @Path("getFreakyService")
-public class GetFreaky {
+public class TestService {
 
     @EJB
-    QueryBean queryBean;
+    TestDao queryBean;
 
     @Context
     SecurityContext securityContext;
 
     Exercise exercise;
 
-    public GetFreaky() {
+    public TestService() {
         exercise = new Exercise("incline bench press");
         exercise.addSet(new WorkingSet(10, 10));
         exercise.addSet(new WorkingSet(9, 9));

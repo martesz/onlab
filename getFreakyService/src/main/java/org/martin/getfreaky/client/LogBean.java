@@ -35,7 +35,7 @@ import org.primefaces.event.SelectEvent;
 @SessionScoped
 public class LogBean {
 
-    public static final String BASE_URL = "http://localhost:20285/getFreakyService/getFreakyService/";
+    public static final String BASE_URL = "http://localhost:20285/getFreakyService/";
 
     private String userId;
     private String email;
@@ -114,6 +114,7 @@ public class LogBean {
         user.setPassword(password);
         Gson gson = new Gson();
         Response response = client.target(BASE_URL)
+                .path("authentication/")
                 .path("signInOrRegisterEmail")
                 .request()
                 .put(Entity.entity(user, MediaType.APPLICATION_JSON));
@@ -136,6 +137,7 @@ public class LogBean {
         Client client = ClientBuilder.newClient();
         Gson gson = new Gson();
         Response response = client.target(BASE_URL)
+                .path("authentication/")
                 .path("signInOrRegisterGoogle")
                 .request()
                 .put(Entity.entity(googleIdToken, MediaType.TEXT_PLAIN));
@@ -158,6 +160,7 @@ public class LogBean {
         Client client = ClientBuilder.newClient();
         Gson gson = new Gson();
         Response response = client.target(BASE_URL)
+                .path("authentication/")
                 .path("signInOrRegisterFacebook")
                 .request()
                 .put(Entity.entity(facebookAccessToken, MediaType.TEXT_PLAIN));
@@ -188,6 +191,7 @@ public class LogBean {
         String path = userId + "/dayLogs/" + fmt.format(date);
         System.out.println(path);
         Response response = client.target(BASE_URL)
+                .path("dayLog/")
                 .path(path)
                 .request(MediaType.APPLICATION_JSON)
                 .header("Authorization", accessToken)
