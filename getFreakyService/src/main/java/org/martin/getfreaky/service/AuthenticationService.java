@@ -13,7 +13,7 @@ import org.martin.getfreaky.database.AuthenticationDao;
 import org.martin.getfreaky.network.LoginResponse;
 import org.martin.getfreaky.network.MergeResponse;
 import org.martin.getfreaky.network.Secured;
-import org.martin.getfreaky.utils.FacebookLogin;
+import org.martin.getfreaky.utils.FacebookServices;
 import org.martin.getfreaky.utils.GoogleSignIn;
 
 /**
@@ -27,6 +27,9 @@ public class AuthenticationService {
 
     @EJB
     private AuthenticationDao authenticationDao;
+    
+    @EJB
+    private FacebookServices facebookServices;
 
     private final Gson gson;
 
@@ -75,7 +78,7 @@ public class AuthenticationService {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
     public String signInOrRegisterWithFacebook(String facebookAccessToken) {
-        User user = FacebookLogin.login(facebookAccessToken);
+        User user = facebookServices.login(facebookAccessToken);
         LoginResponse response = authenticationDao.signInOrRegisterFacebook(user);
         return gson.toJson(response);
     }

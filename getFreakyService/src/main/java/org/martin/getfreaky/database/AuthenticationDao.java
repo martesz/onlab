@@ -9,7 +9,7 @@ import org.martin.getfreaky.dataObjects.MergeData;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.network.LoginResponse;
 import org.martin.getfreaky.network.MergeResponse;
-import org.martin.getfreaky.utils.FacebookLogin;
+import org.martin.getfreaky.utils.FacebookServices;
 import org.martin.getfreaky.utils.GoogleSignIn;
 import org.martin.getfreaky.utils.JWTService;
 import org.martin.getfreaky.utils.Password;
@@ -27,10 +27,13 @@ public class AuthenticationDao {
     private EntityManager em;
 
     @EJB
-    JWTService jWTService;
-    
+    private FacebookServices facebookServices;
+
+    @EJB
+    private JWTService jWTService;
+
     /**
-     * 
+     *
      * @param user The user to be logged in, or registered
      * @return The result of the login or registration
      */
@@ -54,9 +57,9 @@ public class AuthenticationDao {
                     userId, user, jWTService.issueToken(user.getId()));
         }
     }
-    
+
     /**
-     * 
+     *
      * @param user The user to be logged in, or registered
      * @return The result of the login or registration
      */
@@ -80,7 +83,7 @@ public class AuthenticationDao {
     }
 
     /**
-     * 
+     *
      * @param user The user to be logged in, or registered
      * @return The result of the login or registration
      */
@@ -102,13 +105,13 @@ public class AuthenticationDao {
             return new LoginResponse(LoginResponse.ResponseMessage.WRONG_FACEBOOK_ACCESS_TOKEN);
         }
     }
-    
+
     /**
-     * 
+     *
      * @param mergeData The data to be merged into the user's account
      * @return The result of the merge
      */
-     public MergeResponse mergeAccounts(MergeData mergeData) {
+    public MergeResponse mergeAccounts(MergeData mergeData) {
         User user = em.find(User.class, mergeData.getUserId());
         if (user != null) {
             if (mergeData.getEmail() != null) {
@@ -134,13 +137,13 @@ public class AuthenticationDao {
         return new MergeResponse(MergeResponse.Message.MERGE_NOT_SUCCESSFUL);
     }
 
-     /**
-      * 
-      * @param user The user that need the new email
-      * @param email The email to be set
-      * @param password The password to be set
-      * @return The result of the association
-      */
+    /**
+     *
+     * @param user The user that need the new email
+     * @param email The email to be set
+     * @param password The password to be set
+     * @return The result of the association
+     */
     private boolean associateEmail(User user, String email, String password) {
         try {
             User existingUser = (User) em.createQuery("SELECT u from User u where u.email = :email")
@@ -166,7 +169,7 @@ public class AuthenticationDao {
     }
 
     /**
-     * 
+     *
      * @param user The user that gets the google id token
      * @param googleIdToken
      * @return The result of the association
@@ -192,13 +195,13 @@ public class AuthenticationDao {
     }
 
     /**
-     * 
+     *
      * @param user The user that gets the facebook access token
      * @param facebookAccessToken
      * @return The result of the association
      */
     private boolean associateFacebook(User user, String facebookAccessToken) {
-        User fUser = FacebookLogin.login(facebookAccessToken);
+        User fUser = facebookServices.login(facebookAccessToken);
         try {
             User existingUser = (User) em.createQuery("SELECT u from User u where u.facebookId = :facebookId")
                     .setParameter("facebookId", fUser.getFacebookId())

@@ -51,4 +51,13 @@ public interface GetFreakyService {
 
     @PUT("dayLog/{userId}/dayLogs")
     Call<DayLogResponse> putDayLog(@Body DayLog dayLog, @Path("userId") String userId);
+
+    @PUT("friend/add/{email}")
+    Call<FriendResponse> putFriendByEmail(@Path("email") String email);
+
+    @PUT("friend/addFacebookFriends")
+    Call<FriendResponse> putFacebookFriends(@Body String facebookAccessToken);
+
+    @GET("friend/{userId}")
+    Call<List<User>> getFriends(@Path("userId") String userId);
 }

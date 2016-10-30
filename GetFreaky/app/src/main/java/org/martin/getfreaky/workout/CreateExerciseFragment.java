@@ -1,9 +1,7 @@
 package org.martin.getfreaky.workout;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,11 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 
-import org.martin.getfreaky.MainActivity;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.WorkingSet;
-import org.martin.getfreaky.utils.Sequence;
 
 /**
  * Created by martin on 2016. 05. 10..
@@ -100,16 +96,11 @@ public class CreateExerciseFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        int sequenceStart = preferences.getInt(MainActivity.SEQUENCE_KEY, Integer.MAX_VALUE / 2);
-        Sequence.setStart(sequenceStart);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        preferences.edit().putInt(MainActivity.SEQUENCE_KEY, Sequence.getCurrentValue());
     }
 
     public interface ICreateExerciseFragment {

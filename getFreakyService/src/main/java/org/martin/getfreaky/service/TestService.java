@@ -39,7 +39,7 @@ import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.database.TestDao;
 import org.martin.getfreaky.network.MergeResponse;
 import org.martin.getfreaky.network.Secured;
-import org.martin.getfreaky.utils.FacebookLogin;
+import org.martin.getfreaky.utils.FacebookServices;
 import org.martin.getfreaky.utils.GoogleSignIn;
 
 /**
@@ -51,6 +51,9 @@ public class TestService {
 
     @EJB
     TestDao queryBean;
+    
+    @EJB
+    FacebookServices facebook;
 
     @Context
     SecurityContext securityContext;
@@ -179,7 +182,7 @@ public class TestService {
     @Produces(MediaType.APPLICATION_JSON)
     public String signInOrRegisterWithFacebook(String facebookAccessToken) {
         Gson gson = new Gson();
-        User user = FacebookLogin.login(facebookAccessToken);
+        User user = facebook.login(facebookAccessToken);
         LoginResponse response = queryBean.signInOrRegisterFacebook(user);
         return gson.toJson(response);
     }

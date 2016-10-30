@@ -5,13 +5,18 @@
  */
 package org.martin.getfreaky.dataObjects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -21,32 +26,36 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "USERS")
-public class User {
+public class User implements Serializable {
 
     private String id;
 
     // Social accounts
     private String googleId;
     private String facebookId;
-    
+
     private String name;
     private String email;
     private String password;
-    
+
     private List<DayLog> dayLogs;
     private List<Workout> workouts;
 
+    private transient List<User> friends;
+    private transient List<User> friendsOf;
+
     public User() {
-        
+        friendsOf = new ArrayList<>();
+        friends = new ArrayList<>();
         dayLogs = new ArrayList<>();
         workouts = new ArrayList<>();
     }
-    
+
     /**
-     * 
-     * @return The id set for the user 
+     *
+     * @return The id set for the user
      */
-    public String generateUniqueId(){
+    public String generateUniqueId() {
         id = UUID.randomUUID().toString();
         return id;
     }
@@ -119,5 +128,55 @@ public class User {
         this.facebookId = facebookId;
     }
 
-    
+    @ManyToMany
+    @JoinTable(name = "friendships",
+            joinColumns = @JoinColumn(name = "personId"),
+            inverseJoinColumns = @JoinColumn(name = "friendId")
+    )
+    public List<User> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(List<User> friends) {
+        this.friends = friends;
+    }
+
+    @ManyToMany
+    @JoinTable(name = "friendships",
+            joinColumns = @JoinColumn(name = "friendId"),
+            inverseJoinColumns = @JoinColumn(name = "personId")
+    )
+    public List<User> getFriendsOf() {
+        return friendsOf;
+    }
+
+    public void setFriendsOf(List<User> friendsOf) {
+        this.friendsOf = friendsOf;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 17 * hash + Objects.hashCode(this.id);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final User other = (User) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        return true;
+    }
+
 }

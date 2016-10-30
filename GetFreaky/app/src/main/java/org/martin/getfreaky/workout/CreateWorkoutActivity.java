@@ -19,14 +19,12 @@ import android.widget.Toast;
 
 import org.martin.getfreaky.GlobalVariables;
 import org.martin.getfreaky.LoginActivity;
-import org.martin.getfreaky.MainActivity;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.Exercise;
 import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.network.GetFreakyService;
 import org.martin.getfreaky.network.RetrofitClient;
 import org.martin.getfreaky.network.WorkoutResponse;
-import org.martin.getfreaky.utils.Sequence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,16 +140,11 @@ public class CreateWorkoutActivity extends AppCompatActivity implements CreateEx
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int sequenceStart = preferences.getInt(MainActivity.SEQUENCE_KEY, Integer.MAX_VALUE / 2);
-        Sequence.setStart(sequenceStart);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        preferences.edit().putInt(MainActivity.SEQUENCE_KEY, Sequence.getCurrentValue());
     }
 
     @Override

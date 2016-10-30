@@ -24,7 +24,7 @@ import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.WorkingSet;
 import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.network.MergeResponse;
-import org.martin.getfreaky.utils.FacebookLogin;
+import org.martin.getfreaky.utils.FacebookServices;
 import org.martin.getfreaky.utils.GoogleSignIn;
 import org.martin.getfreaky.utils.JWTService;
 import org.martin.getfreaky.utils.Password;
@@ -36,7 +36,10 @@ public class TestDao {
     private EntityManager em;
 
     @EJB
-    JWTService jWTService;
+    private JWTService jWTService;
+    
+    @EJB
+    private FacebookServices facebookServices;
 
     public TestDao() {
 
@@ -186,7 +189,7 @@ public class TestDao {
     }
 
     private boolean associateFacebook(User user, String facebookAccessToken) {
-        User fUser = FacebookLogin.login(facebookAccessToken);
+        User fUser = facebookServices.login(facebookAccessToken);
         try {
             User existingUser = (User) em.createQuery("SELECT u from User u where u.facebookId = :facebookId")
                     .setParameter("facebookId", fUser.getFacebookId())

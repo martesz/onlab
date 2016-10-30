@@ -13,10 +13,15 @@ public class FacebookUser {
 
     private String name;
     private String id;
+    private FacebookFriends friends;
 
-    public FacebookUser(String name, String id) {
+    public FacebookUser(){
+    }
+
+    public FacebookUser(String name, String id, FacebookFriends friends) {
         this.name = name;
         this.id = id;
+        this.friends = friends;
     }
 
     public String getName() {
@@ -35,4 +40,11 @@ public class FacebookUser {
         this.id = id;
     }
 
+    public FacebookFriends getFriends() {
+        return friends;
+    }
+
+    public void setFriends(FacebookFriends friends) {
+        this.friends = friends;
+    }
 }

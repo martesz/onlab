@@ -112,4 +112,8 @@
     <string name="facebook_app_id">767706113368797</string>
     <string name="merge_accounts">Merge Accounts</string>
     <string name="action_associate_email">Associate email and password</string>
+    <string name="friends_label">Friends</string>
+    <string name="menu_friends">Friends</string>
+    <string name="add_by_email">Add by email</string>
+    <string name="add_by_facebook">Add Facebook friends</string>
 </resources>

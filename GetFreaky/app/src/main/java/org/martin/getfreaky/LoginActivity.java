@@ -144,7 +144,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         //Facebook login
         loginButton = (LoginButton) findViewById(R.id.login_button_facebook);
-        loginButton.setReadPermissions("email");
+        loginButton.setReadPermissions("email", "user_friends");
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {

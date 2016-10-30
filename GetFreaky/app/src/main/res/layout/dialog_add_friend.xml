@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/add_friend_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Friend's email address" />
+
+    <EditText
+        android:id="@+id/add_friend_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/add_friend_email_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/add_by_email"/>
+
+    <Button
+        android:id="@+id/add_friend_facebook_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_by_facebook"/>
+
+    <Button
+        android:id="@+id/button_cancel_add_friend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btnCancel"/>
+
+</LinearLayout>
