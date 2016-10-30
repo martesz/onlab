@@ -20,8 +20,10 @@ import android.widget.Toast;
 import org.martin.getfreaky.GlobalVariables;
 import org.martin.getfreaky.LoginActivity;
 import org.martin.getfreaky.R;
+import org.martin.getfreaky.SelectFriendActivity;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.dataObjects.Workout;
+import org.martin.getfreaky.network.FriendResponse;
 import org.martin.getfreaky.network.GetFreakyService;
 import org.martin.getfreaky.network.RetrofitClient;
 import org.martin.getfreaky.network.WorkoutResponse;
@@ -44,9 +46,11 @@ public class WorkoutFragment extends Fragment {
     public static final int REQUEST_NEW_WORKOUT_CODE = 100;
     public static final int REQUEST_EDIT_WORKOUT_CODE = 101;
     private static final int REQUEST_DO_WORKOUT_CODE = 102;
+    private static final int REQUEST_FRIEND_SELECTED = 103;
     public static final int CONTEXT_ACTION_DELETE = 10;
     public static final int CONTEXT_ACTION_EDIT = 11;
     public static final int CONTEXT_ACTION_DO_WORKOUT = 12;
+    private static final int CONTEXT_ACTION_SHARE_WORKOUT = 13;
 
     private ListView listView;
     private WorkoutAdapter adapter;
@@ -54,6 +58,7 @@ public class WorkoutFragment extends Fragment {
     private Realm realm;
     private User user;
     private String userId;
+    private String workoutIdToShare;
 
     @Nullable
     @Override
@@ -132,12 +137,33 @@ public class WorkoutFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                     Toast.makeText(getContext(), "Workout edited in the list!", Toast.LENGTH_LONG).show();
 
+                } else if (requestCode == REQUEST_FRIEND_SELECTED) {
+                    String friendId = data.getStringExtra(SelectFriendActivity.KEY_SELECTED_FRIEND_ID);
+                    shareWorkout(friendId, workoutIdToShare);
                 }
                 break;
             case Activity.RESULT_CANCELED:
                 Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_LONG).show();
                 break;
         }
+    }
+
+    private void shareWorkout(String userIdToShare, String workoutIdToShare) {
+        RetrofitClient client = new RetrofitClient((GlobalVariables) this.getActivity().getApplication());
+        GetFreakyService service = client.createService();
+        Call<WorkoutResponse> call = service.shareWorkout(userIdToShare, workoutIdToShare);
+
+        call.enqueue(new Callback<WorkoutResponse>() {
+            @Override
+            public void onResponse(Call<WorkoutResponse> call, Response<WorkoutResponse> response) {
+                Toast.makeText(getContext(), response.body().getMessage().toString(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(Call<WorkoutResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Could not connect to server", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void showNewWorkoutDialog() {
@@ -152,6 +178,7 @@ public class WorkoutFragment extends Fragment {
         menu.add(0, CONTEXT_ACTION_DELETE, 0, "Delete");
         menu.add(0, CONTEXT_ACTION_EDIT, 0, "Edit");
         menu.add(0, CONTEXT_ACTION_DO_WORKOUT, 0, "Do it!");
+        menu.add(0, CONTEXT_ACTION_SHARE_WORKOUT, 0, "Share with friend");
     }
 
     @Override
@@ -182,30 +209,17 @@ public class WorkoutFragment extends Fragment {
             i.putExtra(CreateWorkoutActivity.KEY_EDIT_INDEX, info.position);
             i.putExtra(CreateWorkoutActivity.KEY_EDIT_ID, selectedWorkout.getId());
             startActivity(i);
+        } else if (item.getItemId() == CONTEXT_ACTION_SHARE_WORKOUT) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+            Workout selectedWorkout = (Workout) adapter.getItem(info.position);
+            workoutIdToShare = selectedWorkout.getId();
+            Intent i = new Intent();
+            i.setClass(getContext(), SelectFriendActivity.class);
+            startActivityForResult(i, REQUEST_FRIEND_SELECTED);
         } else {
             return false;
         }
         return true;
-    }
-
-    private void insertWorkout(Workout workout) {
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        realm.copyToRealm(workout);
-        realm.commitTransaction();
-        realm.close();
-    }
-
-    private void updateWorkout(Workout workout, int id) {
-        Realm realm = Realm.getDefaultInstance();
-        realm.beginTransaction();
-        Workout workoutInDB = realm.where(Workout.class)
-                .equalTo("id", id)
-                .findFirst();
-        workoutInDB.setExercises(workout.getExercises());
-        workoutInDB.setName(workout.getName());
-        realm.commitTransaction();
-        realm.close();
     }
 
     private void deleteWorkout(Workout workout) {

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.User;
@@ -19,15 +20,18 @@ import java.util.List;
 
 public class FriendRecyclerAdapter extends RecyclerView.Adapter<ViewHolder> {
 
-    List<User> friends;
-    Context context;
+    private CheckBox lastChecked;
+    private int lastCheckedPos;
+
+    private List<User> friends;
+    private Context context;
 
     public FriendRecyclerAdapter(List<User> friends, Context context) {
         this.friends = friends;
         this.context = context;
     }
 
-    public FriendRecyclerAdapter(Context context){
+    public FriendRecyclerAdapter(Context context) {
         friends = new ArrayList<>();
         this.context = context;
     }
@@ -44,6 +48,29 @@ public class FriendRecyclerAdapter extends RecyclerView.Adapter<ViewHolder> {
         holder.setFriendIdText(friends.get(position).getId());
         holder.setFriendNameText(friends.get(position).getName());
         holder.setFriendEmailText(friends.get(position).getEmail());
+        holder.getCheckBox().setTag(position);
+
+        // Default select the first one
+        if(position == 0 && lastChecked == null) {
+            lastChecked = holder.getCheckBox();
+            holder.getCheckBox().setChecked(true);
+            lastCheckedPos = 0;
+        }
+
+        holder.getCheckBox().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CheckBox checkBox = (CheckBox) view;
+                int clickedPosition = (Integer) checkBox.getTag();
+                if (checkBox.isChecked()) {
+                    if (lastChecked != null && lastChecked != checkBox) {
+                        lastChecked.setChecked(false);
+                    }
+                    lastChecked = checkBox;
+                    lastCheckedPos = clickedPosition;
+                }
+            }
+        });
     }
 
     @Override
@@ -69,13 +96,21 @@ public class FriendRecyclerAdapter extends RecyclerView.Adapter<ViewHolder> {
         notifyItemRemoved(position);
     }
 
-    public void clear(){
+    public void clear() {
         friends.clear();
         notifyDataSetChanged();
     }
 
-    public void addAll(List<User> friends){
+    public void addAll(List<User> friends) {
         this.friends.addAll(friends);
         notifyDataSetChanged();
+    }
+
+    public String getSelectedUserId() {
+        if(lastChecked != null) {
+            return friends.get(lastCheckedPos).getId();
+        } else {
+            return null;
+        }
     }
 }

@@ -116,4 +116,5 @@
     <string name="menu_friends">Friends</string>
     <string name="add_by_email">Add by email</string>
     <string name="add_by_facebook">Add Facebook friends</string>
+    <string name="select_friend_label">Select friend</string>
 </resources>
