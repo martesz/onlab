@@ -46,6 +46,9 @@ public interface GetFreakyService {
     @DELETE("workout/{userId}/workouts/{workoutId}")
     Call<WorkoutResponse> deleteWorkout(@Path("userId") String userId, @Path("workoutId") String workoutId);
 
+    @PUT("workout/{userId}/share/{workoutId}")
+    Call<WorkoutResponse> shareWorkout(@Path("userId") String userId, @Path("workoutId") String workoutId);
+
     @GET("dayLog/{userId}/dayLogs")
     Call<List<DayLog>> getDayLogs(@Path("userId") String userId);
 

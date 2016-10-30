@@ -89,4 +89,22 @@ public class WorkoutDao {
         }
         return new WorkoutResponse(WorkoutResponse.ResponseMessage.SOMETHING_WENT_WRONG);
     }
+
+    /**
+     *
+     * @param workoutId The Id of the workout to be shared
+     * @param userId The Id of the user who gets the workout
+     * @return The result of the sharing
+     */
+    public WorkoutResponse shareWorkout(String workoutId, String userId) {
+        User user = em.find(User.class, userId);
+        Workout workout = em.find(Workout.class, workoutId);
+        if (user != null && workout != null) {
+            if (!user.getWorkouts().contains(workout)) {
+                user.getWorkouts().add(workout);
+                return new WorkoutResponse(WorkoutResponse.ResponseMessage.WORKOUT_SHARED);
+            }
+        }
+        return new WorkoutResponse(WorkoutResponse.ResponseMessage.COULD_NOT_SHARE_WORKOUT);
+    }
 }

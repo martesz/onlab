@@ -11,7 +11,8 @@ package org.martin.getfreaky.network;
  */
 public class WorkoutResponse {
     public enum ResponseMessage {
-        WORKOUT_UPLOADED, WORKOUT_UPDATED, WORKOUT_DELETED, SOMETHING_WENT_WRONG
+        WORKOUT_UPLOADED, WORKOUT_UPDATED, WORKOUT_DELETED, SOMETHING_WENT_WRONG,
+        WORKOUT_SHARED, COULD_NOT_SHARE_WORKOUT
     }
 
     private ResponseMessage message;

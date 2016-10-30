@@ -19,6 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
+import org.martin.getfreaky.dataObjects.Workout;
 import org.martin.getfreaky.database.WorkoutDao;
 import org.martin.getfreaky.network.Secured;
 import org.martin.getfreaky.network.WorkoutResponse;
@@ -26,9 +27,9 @@ import org.martin.getfreaky.network.WorkoutResponse;
 /**
  *
  * @author martin
- * 
+ *
  * REST service for accessing the user's workouts
- * 
+ *
  */
 @Path("workout")
 public class WorkoutService {
@@ -70,7 +71,7 @@ public class WorkoutService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String uploadOrUpdateWorkout(String content, @PathParam("userId") String userId) {
-        org.martin.getfreaky.dataObjects.Workout workout = gson.fromJson(content, org.martin.getfreaky.dataObjects.Workout.class);
+        Workout workout = gson.fromJson(content, Workout.class);
         WorkoutResponse response = workoutDao.insertOrUpdateWorkout(workout, userId);
         return gson.toJson(response);
     }
@@ -82,6 +83,17 @@ public class WorkoutService {
     @Produces(MediaType.APPLICATION_JSON)
     public String deleteWorkout(@PathParam("userId") String userId, @PathParam("workoutId") String workoutId) {
         WorkoutResponse response = workoutDao.deleteWorkout(workoutId, userId);
+        return gson.toJson(response);
+    }
+
+    @PUT
+    @Secured
+    @Path("{userId}/share/{workoutId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String shareWorkout(@PathParam("userId") String userId,
+            @PathParam("workoutId") String workoutId) {
+        WorkoutResponse response = workoutDao.shareWorkout(workoutId, userId);
         return gson.toJson(response);
     }
 
