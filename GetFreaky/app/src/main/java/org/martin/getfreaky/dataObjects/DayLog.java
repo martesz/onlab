@@ -18,45 +18,42 @@ public class DayLog extends RealmObject {
     private String dayLogId;
 
     private Date date;
-    private RealmList<ProgressPicture> progressPictures;
+    private ProgressPicture progressPicture;
     private RealmList<Workout> workoutResults;
     private BodyLog bodylog;
 
     // Only for GSON
-    public DayLog(){
+    public DayLog() {
         dayLogId = UUID.randomUUID().toString();
-        progressPictures = new RealmList<ProgressPicture>();
         workoutResults = new RealmList<Workout>();
         bodylog = new BodyLog();
+        progressPicture = new ProgressPicture();
     }
 
-    public DayLog(Date date){
+    public DayLog(Date date) {
         dayLogId = UUID.randomUUID().toString();
         this.date = date;
-        progressPictures = new RealmList<ProgressPicture>();
         workoutResults = new RealmList<Workout>();
         bodylog = new BodyLog();
+        progressPicture = new ProgressPicture();
     }
 
-    public DayLog(Date date, RealmList<ProgressPicture> progressPictures, RealmList<Workout> workoutResults, BodyLog bodylog) {
+    public DayLog(Date date, ProgressPicture progressPicture, RealmList<Workout> workoutResults, BodyLog bodylog) {
         dayLogId = UUID.randomUUID().toString();
         this.date = date;
-        this.progressPictures = progressPictures;
         this.workoutResults = workoutResults;
         this.bodylog = bodylog;
+        this.progressPicture = progressPicture;
     }
 
-    public DayLog(DayLog dayLog){
+    public DayLog(DayLog dayLog) {
         this.dayLogId = dayLog.getDayLogId();
         this.date = dayLog.getDate();
         this.workoutResults = new RealmList<>();
-        for(Workout workout : dayLog.getWorkoutResults()){
+        for (Workout workout : dayLog.getWorkoutResults()) {
             this.workoutResults.add(new Workout(workout));
         }
-        this.progressPictures = new RealmList<>();
-        for(ProgressPicture pp : dayLog.getProgressPictures()){
-            this.progressPictures.add(new ProgressPicture(pp));
-        }
+        this.progressPicture = new ProgressPicture(dayLog.getProgressPicture());
         this.bodylog = new BodyLog(dayLog.getBodylog());
     }
 
@@ -68,12 +65,12 @@ public class DayLog extends RealmObject {
         this.date = date;
     }
 
-    public RealmList<ProgressPicture> getProgressPictures() {
-        return progressPictures;
+    public ProgressPicture getProgressPicture() {
+        return progressPicture;
     }
 
-    public void setProgressPictures(RealmList<ProgressPicture> progressPictures) {
-        this.progressPictures = progressPictures;
+    public void setProgressPicture(ProgressPicture progressPicture) {
+        this.progressPicture = progressPicture;
     }
 
     public RealmList<Workout> getWorkoutResults() {

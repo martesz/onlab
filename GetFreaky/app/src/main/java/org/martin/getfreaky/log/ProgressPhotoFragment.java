@@ -2,8 +2,10 @@ package org.martin.getfreaky.log;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -12,7 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import org.martin.getfreaky.MyPagerAdapter;
 import org.martin.getfreaky.R;
+import org.martin.getfreaky.dataObjects.DayLog;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 
 /**
  * Created by martin on 2016. 05. 19..
@@ -20,13 +27,29 @@ import org.martin.getfreaky.R;
 public class ProgressPhotoFragment extends Fragment {
     private static final int CAMERA_REQUEST = 1888;
     private ImageView imageView;
+    private Realm realm;
+    private DayLog dayLog;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_progress_photo, null);
 
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String daylogId = preferences.getString(MyPagerAdapter.SELECTED_DAYLOG_ID, "NO_KEY");
+
+        RealmConfiguration config = new RealmConfiguration.Builder(getContext()).build();
+        Realm.setDefaultConfiguration(config);
+        realm = Realm.getDefaultInstance();
+        dayLog = realm.where(DayLog.class).equalTo("dayLogId", daylogId).findFirst();
+
+        Bitmap existingImage = dayLog.getProgressPicture().getImageBitmap();
+
         imageView = (ImageView) v.findViewById(R.id.progressPhoto);
+
+        if(existingImage != null) {
+            imageView.setImageBitmap(existingImage);
+        }
 
         FloatingActionButton fab =
                 (FloatingActionButton) v.findViewById(R.id.photoButton);
@@ -46,6 +69,9 @@ public class ProgressPhotoFragment extends Fragment {
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
             imageView.setImageBitmap(photo);
+            realm.beginTransaction();
+            dayLog.getProgressPicture().setImage(photo);
+            realm.commitTransaction();
         }
     }
 }

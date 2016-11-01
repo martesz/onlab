@@ -29,8 +29,8 @@ public class DayLog {
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date date;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    private List<ProgressPicture> progressPictures;
+    @OneToOne(cascade = CascadeType.ALL)
+    private ProgressPicture progressPicture;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<Workout> workoutResults;
@@ -41,7 +41,6 @@ public class DayLog {
     // Only for GSON
     public DayLog() {
         dayLogId = UUID.randomUUID().toString();
-        progressPictures = new ArrayList<>();
         workoutResults = new ArrayList<>();
         bodylog = new BodyLog();
     }
@@ -49,14 +48,13 @@ public class DayLog {
     public DayLog(Date date) {
         dayLogId = UUID.randomUUID().toString();
         this.date = date;
-        progressPictures = new ArrayList<>();
         workoutResults = new ArrayList<>();
     }
 
-    public DayLog(Date date, List<ProgressPicture> progressPictures, List<Workout> workouts, BodyLog bodylog) {
+    public DayLog(Date date, ProgressPicture progressPictures, List<Workout> workouts, BodyLog bodylog) {
         dayLogId = UUID.randomUUID().toString();
         this.date = date;
-        this.progressPictures = progressPictures;
+        this.progressPicture = progressPictures;
         this.workoutResults = workouts;
         this.bodylog = bodylog;
     }
@@ -69,12 +67,12 @@ public class DayLog {
         this.date = date;
     }
 
-    public List<ProgressPicture> getProgressPictures() {
-        return progressPictures;
+    public ProgressPicture getProgressPicture() {
+        return progressPicture;
     }
 
-    public void setProgressPictures(List<ProgressPicture> progressPictures) {
-        this.progressPictures = progressPictures;
+    public void setProgressPicture(ProgressPicture progressPictures) {
+        this.progressPicture = progressPictures;
     }
 
     public List<Workout> getWorkoutResults() {

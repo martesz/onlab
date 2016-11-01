@@ -12,6 +12,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import org.martin.getfreaky.dataObjects.DayLog;
+import org.martin.getfreaky.dataObjects.ProgressPicture;
 import org.martin.getfreaky.dataObjects.User;
 import org.martin.getfreaky.network.DayLogResponse;
 import org.martin.getfreaky.utils.ListUtils;
@@ -61,8 +62,8 @@ public class DayLogDao {
             }
         } else {
             existing.setDate(dayLog.getDate());
-            ListUtils.merge(existing.getProgressPictures(), dayLog.getProgressPictures());
             ListUtils.merge(existing.getWorkoutResults(), dayLog.getWorkoutResults());
+            existing.getProgressPicture().setImage(dayLog.getProgressPicture().getImage());
             existing.updateBodyLog(dayLog.getBodylog());
             return new DayLogResponse(DayLogResponse.ResponseMessage.DAYLOG_UPDATED);
         }

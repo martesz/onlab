@@ -31,29 +31,29 @@ import org.martin.getfreaky.utils.Password;
 
 @Stateless
 public class TestDao {
-
+    
     @PersistenceContext(unitName = "getfreaky")
     private EntityManager em;
-
+    
     @EJB
     private JWTService jWTService;
     
     @EJB
     private FacebookServices facebookServices;
-
+    
     public TestDao() {
-
+        
     }
-
+    
     public void saveWorkingSet(WorkingSet workingSet) {
         em.persist(workingSet);
-
+        
     }
-
+    
     public void saveExercise(Exercise ex) {
         em.persist(ex);
     }
-
+    
     public void saveDayLog(DayLog dl) {
         em.persist(dl);
     }
@@ -64,7 +64,7 @@ public class TestDao {
             User existingUser = (User) em.createQuery("SELECT u from User u where u.email = :email")
                     .setParameter("email", user.getEmail())
                     .getSingleResult();
-
+            
             if (Password.equals(user.getPassword(), existingUser.getPassword())) {
                 return new LoginResponse(LoginResponse.ResponseMessage.USER_SIGNED_IN,
                         existingUser.getId(), existingUser, jWTService.issueToken(existingUser.getId()));
@@ -79,7 +79,7 @@ public class TestDao {
                     userId, user, jWTService.issueToken(user.getId()));
         }
     }
-
+    
     public LoginResponse signInOrRegisterGoogle(User user) {
         if (user != null) {
             try {
@@ -98,7 +98,7 @@ public class TestDao {
             return new LoginResponse(LoginResponse.ResponseMessage.WRONG_GOOGLE_ID_TOKEN);
         }
     }
-
+    
     public LoginResponse signInOrRegisterFacebook(User user) {
         if (user != null) {
             try {
@@ -117,7 +117,7 @@ public class TestDao {
             return new LoginResponse(LoginResponse.ResponseMessage.WRONG_FACEBOOK_ACCESS_TOKEN);
         }
     }
-
+    
     public MergeResponse mergeAccounts(MergeData mergeData) {
         User user = em.find(User.class, mergeData.getUserId());
         if (user != null) {
@@ -143,13 +143,13 @@ public class TestDao {
         }
         return new MergeResponse(MergeResponse.Message.MERGE_NOT_SUCCESSFUL);
     }
-
+    
     private boolean associateEmail(User user, String email, String password) {
         try {
             User existingUser = (User) em.createQuery("SELECT u from User u where u.email = :email")
                     .setParameter("email", email)
                     .getSingleResult();
-
+            
             if (Password.equals(password, existingUser.getPassword())
                     && existingUser.getGoogleId() == null
                     && existingUser.getFacebookId() == null
@@ -167,7 +167,7 @@ public class TestDao {
             return true;
         }
     }
-
+    
     private boolean associateGoogle(User user, String googleIdToken) {
         User googleUser = GoogleSignIn.authenticateAndroid(googleIdToken);
         try {
@@ -187,7 +187,7 @@ public class TestDao {
             return true;
         }
     }
-
+    
     private boolean associateFacebook(User user, String facebookAccessToken) {
         User fUser = facebookServices.login(facebookAccessToken);
         try {
@@ -207,30 +207,30 @@ public class TestDao {
             return true;
         }
     }
-
+    
     private void mergeUsers(User a, User b) {
         a.getWorkouts().addAll(b.getWorkouts());
         em.remove(b);
     }
-
+    
     public List<Exercise> getAllExercises() {
         List<Exercise> result = em.createNamedQuery("findAllExercises").getResultList();
         return result;
     }
-
+    
     public List<DayLog> getAllDaylogs() {
         List<DayLog> result = em.createNamedQuery("findAllDayLogs").getResultList();
         return result;
     }
-
+    
     public Exercise getExercise(String id) {
         return em.find(Exercise.class, id);
     }
-
+    
     public WorkingSet getWorkingSet(long id) {
         return em.find(WorkingSet.class, id);
     }
-
+    
     public List<Workout> getWorkouts(String userId) {
         User user = em.find(User.class, userId);
         if (user != null) {
@@ -239,7 +239,7 @@ public class TestDao {
             return new ArrayList<>();
         }
     }
-
+    
     public WorkoutResponse insertOrUpdateWorkout(Workout workout, String userId) {
         Workout existing = em.find(Workout.class, workout.getId());
         if (existing == null) {
@@ -250,11 +250,11 @@ public class TestDao {
             existing.setName(workout.getName());
             Iterator<Exercise> it = existing.getExercises().iterator();
             merge(existing.getExercises(), workout.getExercises());
-
+            
             return new WorkoutResponse(WorkoutResponse.ResponseMessage.WORKOUT_UPDATED);
         }
     }
-
+    
     public List<DayLog> getDayLogs(String userId) {
         User user = em.find(User.class, userId);
         if (user != null) {
@@ -263,7 +263,7 @@ public class TestDao {
             return new ArrayList<>();
         }
     }
-
+    
     public DayLogResponse insertOrUpdateDayLog(DayLog dayLog, String userId) {
         DayLog existing = em.find(DayLog.class, dayLog.getDayLogId());
         if (existing == null) {
@@ -276,13 +276,13 @@ public class TestDao {
             }
         } else {
             existing.setDate(dayLog.getDate());
-            merge(existing.getProgressPictures(), dayLog.getProgressPictures());
+            existing.setProgressPicture(dayLog.getProgressPicture());
             merge(existing.getWorkoutResults(), dayLog.getWorkoutResults());
             existing.updateBodyLog(dayLog.getBodylog());
             return new DayLogResponse(DayLogResponse.ResponseMessage.DAYLOG_UPDATED);
         }
     }
-
+    
     public <T> void merge(List<T> existing, List<T> uploaded) {
         Iterator<T> it = existing.iterator();
         while (it.hasNext()) {
@@ -317,7 +317,7 @@ public class TestDao {
                     return new WorkoutResponse(WorkoutResponse.ResponseMessage.WORKOUT_DELETED);
                 }
             }
-
+            
         }
         return new WorkoutResponse(WorkoutResponse.ResponseMessage.SOMETHING_WENT_WRONG);
     }
@@ -344,5 +344,5 @@ public class TestDao {
             return new DayLog();
         }
     }
-
+    
 }
