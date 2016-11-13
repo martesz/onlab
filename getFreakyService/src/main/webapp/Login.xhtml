@@ -5,111 +5,111 @@
       xmlns:fb="http://www.facebook.com/2008/fbml">
     <h:head>
         <title>Get Freaky</title>
+
+        <h:outputStylesheet library="css" name="login.css"/>
+
         <script src="https://apis.google.com/js/platform.js" async = "defer"></script>
         <meta name="google-signin-client_id" content="184243885869-65g68jc9lbuv89093ncuc5vt0fj8p78q.apps.googleusercontent.com"/>
         <script type="text/javascript">
             function onSignIn(googleUser) {
-                var profile = googleUser.getBasicProfile();
-                console.log('Name: ' + profile.getName());
-                var id_token = googleUser.getAuthResponse().id_token;
-                document.getElementById("google:idToken").value = id_token;
-                document.getElementById("google:signIn").click();
+            var profile = googleUser.getBasicProfile();
+            console.log('Name: ' + profile.getName());
+            var id_token = googleUser.getAuthResponse().id_token;
+            document.getElementById("loginForm:idToken").value = id_token;
+            document.getElementById("loginForm:googleSignIn").click();
             }
 
+          
+
             function signOut() {
-                var auth2 = gapi.auth2.getAuthInstance();
-                auth2.signOut().then(function () {
-                    console.log('User signed out.');
-                });
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+            console.log('User signed out.');
+            });
             }
         </script>
         <script>
             // This is called with the results from from FB.getLoginStatus().
             function statusChangeCallback(response) {
-                console.log('statusChangeCallback');
-                console.log(response);
-                if (response.status === 'connected') {
-                    // Logged into your app and Facebook.
-                    var accessToken = response.authResponse.accessToken;
-                    document.getElementById("facebook:accessToken").value = accessToken;
-                    document.getElementById("facebook:signIn").click();
-                    testAPI();
-                } else if (response.status === 'not_authorized') {
-                    // The person is logged into Facebook, but not your app.
-                    document.getElementById('status').innerHTML = 'Please log ' +
-                            'into this app.';
-                } else {
-                    // The person is not logged into Facebook, so we're not sure if
-                    // they are logged into this app or not.
-                    document.getElementById('status').innerHTML = 'Please log ' +
-                            'into Facebook.';
-                }
+            console.log('statusChangeCallback');
+            console.log(response);
+            if (response.status === 'connected') {
+            // Logged into your app and Facebook.
+            var accessToken = response.authResponse.accessToken;
+            document.getElementById("loginForm:accessToken").value = accessToken;
+            document.getElementById("loginForm:facebookSignIn").click();
+            testAPI();
+            } else if (response.status === 'not_authorized') {
+            // The person is logged into Facebook, but not your app.
+            document.getElementById('status').innerHTML = 'Please log ' +
+                    'into this app.';
+            } else {
+            // The person is not logged into Facebook, so we're not sure if
+            // they are logged into this app or not.
+            document.getElementById('status').innerHTML = 'Please log ' +
+                    'into Facebook.';
+            }
             }
 
             // This function is called when someone finishes with the Login
             // Button.  See the onlogin handler attached to it in the sample
             // code below.
             function checkLoginState() {
-                FB.getLoginStatus(function (response) {
-                    statusChangeCallback(response);
-                });
+            FB.getLoginStatus(function (response) {
+            statusChangeCallback(response);
+            });
             }
 
             window.fbAsyncInit = function () {
-                FB.init({
-                    appId: '767706113368797',
+            FB.init({
+            appId: '767706113368797',
                     cookie: true, // enable cookies to allow the server to access 
                     // the session
                     xfbml: true, // parse social plugins on this page
                     version: 'v2.5' // use graph api version 2.5
-                });
-
-                FB.getLoginStatus(function (response) {
-                    statusChangeCallback(response);
-                });
-
+            });
+            FB.getLoginStatus(function (response) {
+            statusChangeCallback(response);
+            });
             };
-
             // Load the SDK asynchronously
             (function (d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id))
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id))
                     return;
-                js = d.createElement(s);
-                js.id = id;
-                js.src = "//connect.facebook.net/en_US/sdk.js";
-                fjs.parentNode.insertBefore(js, fjs);
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "//connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
             }(document, 'script', 'facebook-jssdk'));
-
             // Here we run a very simple test of the Graph API after login is
             // successful.  See statusChangeCallback() for when this call is made.
-            function testAPI() {                
-                console.log('Welcome!  Fetching your information.... ');
-                FB.api('/me', function (response) {
-                    
-                });
+            function testAPI() {
+            console.log('Welcome!  Fetching your information.... ');
+            FB.api('/me', function (response) {
+
+            });
             }
         </script>
     </h:head>
     <h:body>
-        <h:form id="email">
+        <h:form id="loginForm" style="text-align: center">
+            <header>Sign in or register</header>
             <h:outputLabel value="Email: "/>
             <h:inputText id="userName" value="#{logBean.email}"></h:inputText> <br/>
             <h:outputLabel value="Password: "/>
             <h:inputSecret id="password" value="#{logBean.password}"></h:inputSecret> <br/>
-            <h:commandButton value="Sign in" id="login" action="#{logBean.login}"/> <br/>
+            <h:commandButton value="Sign in" id="login" action="#{logBean.login}" style="width: 90%; background: #FF3838; margin: 5%"/> <br/>
             <h:outputLabel value="#{logBean.loginResult}"/>
-        </h:form>
-        <h:form id="google">            
-            <div class="g-signin2" data-onsuccess="onSignIn"></div>
-            <a href="#" onclick="signOut();">Sign out</a>
+
+            <div class="g-signin2" data-onsuccess="onSignIn" data-width="300" data-longtitle="true"></div>
+            <!-- <a href="#" onclick="signOut();">Sign out</a> -->
             <h:inputText id="idToken" value="#{logBean.googleIdToken}" style="display: none"></h:inputText> <br/>
-            <h:commandButton id="signIn" action="#{logBean.googleSignIn()}" style="display: none"/> <br/>
-        </h:form>
-        <h:form id="facebook">
+            <h:commandButton id="googleSignIn" action="#{logBean.googleSignIn()}" style="display: none"/> <br/>
+
             <fb:login-button scope="public_profile,email" onlogin="checkLoginState();"/>            
             <h:inputText id="accessToken" value="#{logBean.facebookAccessToken}" style="display: none"></h:inputText> <br/>
-            <h:commandButton id="signIn" action="#{logBean.facebookSignIn()}" style="display: none"/> <br/>
+            <h:commandButton id="facebookSignIn" action="#{logBean.facebookSignIn()}" style="display: none"/> <br/>
         </h:form>
     </h:body>
 </html>

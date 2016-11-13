@@ -11,6 +11,15 @@ and open the template in the editor.
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:fb="http://www.facebook.com/2008/fbml">
     <h:head>
+        <style>
+            body {
+                background: tomato;
+                justify-content: center;
+                align-items: center;
+                font-size: 16px;
+            }
+
+        </style>
         <title>Get Freaky</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <script name="jquery/jquery.js" library="primefaces"></script>
@@ -35,6 +44,7 @@ and open the template in the editor.
 
             function logOut() {
                 signOut();
+                document.getElementById("facebookButton").click;
             }
         </script>
         <script>
@@ -101,17 +111,20 @@ and open the template in the editor.
 
                 });
             }
-            
-            function logOutFaceboot(){
+
+            function logOutFaceboot() {
                 document.getElementById("logout:button").click;
             }
         </script>
     </h:head>
-    <h:body>
-        <div>Logged in as : #{logBean.email}</div>
-        <div class="g-signin2" data-onsuccess="onSignIn"></div>
-        <fb:login-button scope="public_profile,email" autologoutlink="true" onlogin="checkLoginState();" onlogout="logOutFaceboot();"/>   
-        <h:form>
+    <h:body >
+        <div>Logged in as: #{logBean.email}</div>
+        <div class="g-signin2" data-onsuccess="onSignIn" style="display: none"></div>
+        <fb:login-button id="facebookButton" scope="public_profile,email" autologoutlink="true" onlogin="checkLoginState();" onlogout="logOutFaceboot();"/>   
+        <h:form id="logout">
+            <h:commandButton id="button" value="Sign out from app" onclick="logOut();" action="#{logBean.logOut()}"/>
+        </h:form>
+        <h:form style="text-align: center">
             <p:calendar value="#{logBean.date}"  >
                 <p:ajax event="dateSelect" listener="#{logBean.dateSelected}" update="@(.updateList)"/>
             </p:calendar>
@@ -125,8 +138,6 @@ and open the template in the editor.
                 #{result}
             </p:dataList>
         </h:form>
-        <h:form id="logout">
-            <h:commandButton id="button" value="Sign out from app" onclick="logOut();" action="#{logBean.logOut()}"/>
-        </h:form>
+
     </h:body>
 </html>

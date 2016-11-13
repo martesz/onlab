@@ -14,6 +14,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
+
 import org.martin.getfreaky.MyPagerAdapter;
 import org.martin.getfreaky.R;
 import org.martin.getfreaky.dataObjects.DayLog;
@@ -29,6 +33,7 @@ public class ProgressPhotoFragment extends Fragment {
     private ImageView imageView;
     private Realm realm;
     private DayLog dayLog;
+    private Bitmap image;
 
     @Nullable
     @Override
@@ -47,8 +52,9 @@ public class ProgressPhotoFragment extends Fragment {
 
         imageView = (ImageView) v.findViewById(R.id.progressPhoto);
 
-        if(existingImage != null) {
+        if (existingImage != null) {
             imageView.setImageBitmap(existingImage);
+            this.image = existingImage;
         }
 
         FloatingActionButton fab =
@@ -61,6 +67,23 @@ public class ProgressPhotoFragment extends Fragment {
             }
         });
 
+        FloatingActionButton shareButton = (FloatingActionButton) v.findViewById(R.id.facebook_share_button);
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Bitmap imageToFb = image;
+                if (imageToFb != null) {
+                    SharePhoto photo = new SharePhoto.Builder()
+                            .setBitmap(imageToFb)
+                            .build();
+                    SharePhotoContent content = new SharePhotoContent.Builder()
+                            .addPhoto(photo)
+                            .build();
+                    ShareDialog.show(getActivity(), content);
+                }
+            }
+        });
+
         return v;
     }
 
@@ -68,6 +91,7 @@ public class ProgressPhotoFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             Bitmap photo = (Bitmap) data.getExtras().get("data");
+            this.image = photo;
             imageView.setImageBitmap(photo);
             realm.beginTransaction();
             dayLog.getProgressPicture().setImage(photo);

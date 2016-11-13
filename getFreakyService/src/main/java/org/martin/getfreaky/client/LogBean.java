@@ -146,6 +146,7 @@ public class LogBean {
 
         if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
                 || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
+            email = lr.getUser().getName();
             userId = lr.getAssignedUserId();
             accessToken = lr.getAccessToken();
             return "loginSuccessful";
@@ -169,6 +170,7 @@ public class LogBean {
 
         if (lr.getMessage().equals(LoginResponse.ResponseMessage.USER_REGISTERED)
                 || lr.getMessage().equals(LoginResponse.ResponseMessage.USER_SIGNED_IN)) {
+            email = lr.getUser().getName();
             userId = lr.getAssignedUserId();
             accessToken = lr.getAccessToken();
             return "loginSuccessful";
